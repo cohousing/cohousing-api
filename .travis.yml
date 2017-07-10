@@ -15,7 +15,7 @@ install:
   - govendor sync
 
 script:
-  - govendor build
+  - govendor test -race -coverprofile=coverage.txt -covermode=atomic
   - docker build -t "cohousing-api:latest" .
 
 after_success:

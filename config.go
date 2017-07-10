@@ -34,7 +34,7 @@ type Tenant struct {
 }
 
 func Configure() {
-	loadStaticConfiguration()
+	LoadStaticConfiguration()
 
 	dynamicConfigRefresher()
 }
@@ -46,7 +46,7 @@ func GetTenantByHost(host string) *Tenant {
 	return tenantCache[host]
 }
 
-func loadStaticConfiguration() {
+func LoadStaticConfiguration() {
 	configor.Load(&config, "config.yml")
 }
 
