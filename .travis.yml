@@ -16,4 +16,4 @@ install:
 
 script:
   - govendor build
-  - docker build -t cohousing/cohousing-api:latest
+  - docker build -t "cohousing-api:latest" .
