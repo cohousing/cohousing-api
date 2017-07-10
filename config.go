@@ -8,8 +8,11 @@ import (
 )
 
 var (
-	tenantCache map[string]*Tenant
-	config      = struct {
+	tenantCache            map[string]*Tenant
+	cacheRefresherDuration time.Duration = 1 * time.Minute
+	tenantRefresherQuitter chan struct{}
+
+	config = struct {
 		TenantDomain string
 
 		ConfigDB struct {
@@ -20,7 +23,11 @@ var (
 			Name     string
 		}
 	}{}
+
+	tenantsLoaderFunc TenantsLoaderFunc = loadTenantsFromDB
 )
+
+type TenantsLoaderFunc func() []Tenant
 
 type Tenant struct {
 	gorm.Model
@@ -51,27 +58,23 @@ func LoadStaticConfiguration() {
 }
 
 func dynamicConfigRefresher() {
-	ticker := time.NewTicker(1 * time.Minute)
-	quit := make(chan struct{})
+	ticker := time.NewTicker(cacheRefresherDuration)
+	tenantRefresherQuitter = make(chan struct{})
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
 				refreshTenantCache()
-			case <-quit:
+			case <-tenantRefresherQuitter:
 				ticker.Stop()
 				return
 			}
 		}
 	}()
-
-	refreshTenantCache()
 }
 
 func refreshTenantCache() {
-	var tenants []Tenant
-
-	getConfDB().Find(&tenants)
+	tenants := tenantsLoaderFunc()
 
 	newTenantCache := make(map[string]*Tenant)
 	for _, tenant := range tenants {
@@ -85,4 +88,12 @@ func refreshTenantCache() {
 
 func buildTenantDomain(context string) string {
 	return fmt.Sprintf(config.TenantDomain, context)
+}
+
+func loadTenantsFromDB() []Tenant {
+	var tenants []Tenant
+
+	getConfDB().Find(&tenants)
+
+	return tenants
 }
