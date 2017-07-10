@@ -17,3 +17,6 @@ install:
 script:
   - govendor build
   - docker build -t "cohousing-api:latest" .
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
