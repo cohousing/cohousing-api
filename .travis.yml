@@ -1,0 +1,13 @@
+language: go
+
+go:
+  - 1.8
+
+go_import_path: github.com/cohousing/cohousing-api
+
+install:
+  - go get -u github.com/kardianos/govendor
+  - govendor sync
+
+script:
+  - govendor build
