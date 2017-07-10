@@ -1,3 +1,8 @@
+sudo: required
+
+services:
+  - docker
+
 language: go
 
 go:
@@ -11,3 +16,4 @@ install:
 
 script:
   - govendor build
+  - docker build -t cohousing/cohousing-api:latest
