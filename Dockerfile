@@ -1,14 +1,9 @@
-FROM golang:1.8-alpine
+FROM alpine:3.5
 MAINTAINER Frank Bille-Stauner <frank@cohousing.nu>
 
-WORKDIR /go/src/github.com/cohousing/cohousing-api
-COPY . .
-
-RUN go-wrapper download
-RUN go-wrapper install
+ADD cohousing-api /
+ADD config.yml /
 
 EXPOSE 8080
 
-ENV GIN_MODE release
-
-ENTRYPOINT ["go-wrapper", "run"]
+CMD ["/cohousing-api"]
