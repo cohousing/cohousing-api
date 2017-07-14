@@ -15,7 +15,7 @@ install:
   - govendor sync
 
 script:
-  - govendor test -race -coverprofile=coverage.txt -covermode=atomic
+  - govendor test -coverprofile=coverage.txt -covermode=atomic
   - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cohousing-api .
   - docker build -t "cohousing-api:latest" .
 
