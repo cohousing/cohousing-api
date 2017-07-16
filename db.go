@@ -16,6 +16,7 @@ func getTenantDB(tenant *Tenant) *gorm.DB {
 	db := dbCache[tenant.Context]
 	if db == nil {
 		connectionString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", config.ConfigDB.User, config.ConfigDB.Password, config.ConfigDB.Host, config.ConfigDB.Port, tenant.Context)
+		fmt.Printf("Establishing db connection for %s: %s", tenant.Context, connectionString)
 		var err error
 		db, err = gorm.Open("mysql", connectionString)
 		if err != nil {
