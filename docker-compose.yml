@@ -15,7 +15,7 @@ services:
       - "traefik.docker.network=cohousing_net_web"
       - "traefik.backend.loadbalancer.swarm=true"
     deploy:
-      replicas: 3
+      replicas: 1
       mode: replicated
       update_config:
         parallelism: 1
