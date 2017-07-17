@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
-	"os"
 )
 
 const (
