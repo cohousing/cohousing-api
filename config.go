@@ -47,7 +47,7 @@ func GetTenantByHost(host string) *Tenant {
 	if tenantCache == nil {
 		refreshTenantCache()
 	}
-	fmt.Fprintf(os.Stdout, "Looking up tenant for host: %s", host)
+	fmt.Fprintf(os.Stdout, "Looking up tenant for host: %s\n", host)
 	return tenantCache[host]
 }
 
