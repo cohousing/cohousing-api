@@ -33,10 +33,6 @@ type Tenant struct {
 	gorm.Model
 	Context    string `gorm:"size:100"`
 	Name       string
-	DbUsername string `gorm:"size:32"`
-	DbPassword string `gorm:"size:32"`
-	DbHostname string `gorm:"size:50"`
-	DbDatabase string `gorm:"size:64"`
 	CustomUrl  string
 }
 

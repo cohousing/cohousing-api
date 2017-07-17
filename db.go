@@ -14,6 +14,7 @@ var (
 
 func getTenantDB(tenant *Tenant) *gorm.DB {
 	db := dbCache[tenant.Context]
+	fmt.Printf("Getting DB connection for %s, got %v", tenant.Context, db)
 	if db == nil {
 		connectionString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", config.ConfigDB.User, config.ConfigDB.Password, config.ConfigDB.Host, config.ConfigDB.Port, tenant.Context)
 		fmt.Printf("Establishing db connection for %s: %s", tenant.Context, connectionString)
