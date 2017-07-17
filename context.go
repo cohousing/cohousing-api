@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
-	"fmt"
 )
 
 const (
@@ -37,7 +37,7 @@ func MustBeTenant() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if !c.GetBool(GIN_IS_TENANT) {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-				"error": fmt.Sprintf("No tenant found on URL: %s", c.Request.RequestURI),
+				"error": fmt.Sprintf("No tenant found on URL: %s", c.Request.Host),
 			})
 		}
 	}
