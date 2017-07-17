@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/configor"
 	"github.com/jinzhu/gorm"
 	"time"
+	"os"
 )
 
 var (
@@ -80,6 +81,7 @@ func refreshTenantCache() {
 		}
 	}
 	tenantCache = newTenantCache
+	fmt.Fprintf(os.Stdout, "Tenant cache refreshed %v\n", tenantCache)
 }
 
 func buildTenantDomain(context string) string {
