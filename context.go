@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -15,11 +16,15 @@ const (
 // Resolves the context based on URL
 func ContextResolver() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		host, _, err := net.SplitHostPort(c.Request.Host)
+		host := c.Request.Host
 
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-			return
+		if strings.Index(host, ":") > -1 {
+			var err error
+			host, _, err = net.SplitHostPort(host)
+			if err != nil {
+				c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
 		}
 
 		tenant := GetTenantByHost(host)
