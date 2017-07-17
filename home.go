@@ -4,6 +4,6 @@ import "github.com/gin-gonic/gin"
 
 func homeRoute(c *gin.Context) {
 	c.JSON(200, gin.H{
-		"message": "pong",
+		"message": "pongelong",
 	})
 }

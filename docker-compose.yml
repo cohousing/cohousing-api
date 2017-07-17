@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  api:
+    image: cohousing/cohousing-api:latest
+    networks:
+      - web
+      - db
+    volumes:
+      - /data/cohousing/config.yml:/config.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.backend=cohousing-api"
+      - "traefik.frontend.rule=Host: cohousing.nu, www.cohousing.nu, jystrupsavvaerk.cohousing.nu"
+      - "traefik.docker.network=traefik_webgateway"
+      - "traefik.backend.loadbalancer.swarm=true"
+    deploy:
+      replicas: 3
+      mode: replicated
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  db:
+    external:
+      name: cohousing_net_db
+  web:
+    external:
+      name: cohousing_net_web
