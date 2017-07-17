@@ -31,9 +31,9 @@ type TenantsLoaderFunc func() []Tenant
 
 type Tenant struct {
 	gorm.Model
-	Context    string `gorm:"size:100"`
-	Name       string
-	CustomUrl  string
+	Context   string `gorm:"size:100"`
+	Name      string
+	CustomUrl string
 }
 
 func Configure() {

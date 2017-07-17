@@ -5,6 +5,7 @@ import (
 	"github.com/cohousing/cohousing-api/domain"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"os"
 )
 
 var (
@@ -14,10 +15,10 @@ var (
 
 func getTenantDB(tenant *Tenant) *gorm.DB {
 	db := dbCache[tenant.Context]
-	fmt.Printf("Getting DB connection for %s, got %v", tenant.Context, db)
+	fmt.Fprintf(os.Stdout, "Getting DB connection for %s, got %v", tenant.Context, db)
 	if db == nil {
 		connectionString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", config.ConfigDB.User, config.ConfigDB.Password, config.ConfigDB.Host, config.ConfigDB.Port, tenant.Context)
-		fmt.Printf("Establishing db connection for %s: %s", tenant.Context, connectionString)
+		fmt.Fprintf(os.Stdout, "Establishing db connection for %s: %s", tenant.Context, connectionString)
 		var err error
 		db, err = gorm.Open("mysql", connectionString)
 		if err != nil {
