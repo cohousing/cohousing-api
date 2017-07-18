@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/jinzhu/configor"
 	"github.com/jinzhu/gorm"
-	"os"
 	"time"
 )
 
@@ -47,7 +46,6 @@ func GetTenantByHost(host string) *Tenant {
 	if tenantCache == nil {
 		refreshTenantCache()
 	}
-	fmt.Fprintf(os.Stdout, "Looking up tenant for host: %s\n", host)
 	return tenantCache[host]
 }
 
@@ -82,7 +80,6 @@ func refreshTenantCache() {
 		}
 	}
 	tenantCache = newTenantCache
-	fmt.Fprintf(os.Stdout, "Tenant cache refreshed %v\n", tenantCache)
 }
 
 func buildTenantDomain(context string) string {
