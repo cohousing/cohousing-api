@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"net/http"
@@ -30,8 +31,8 @@ func getResourceList(repository *Repository) gin.HandlerFunc {
 func getResourceById(repository *Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
-			if item, err := repository.GetById(GetTenantFromContext(c), id); err == nil {
-				c.JSON(http.StatusOK, item)
+			if object, err := repository.GetById(GetTenantFromContext(c), id); err == nil {
+				c.JSON(http.StatusOK, object)
 			} else if err == gorm.ErrRecordNotFound {
 				c.AbortWithStatus(http.StatusNotFound)
 			} else {
@@ -40,27 +41,74 @@ func getResourceById(repository *Repository) gin.HandlerFunc {
 				})
 			}
 		} else {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error": "id is not an unsigned integer",
-			})
+			abortOnIdParsingError(c, id)
 		}
 	}
 }
 
 func createNewResource(repository *Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		object := reflect.New(repository.DomainType).Interface()
+		if c.BindJSON(&object) == nil {
 
+			createdObject, err := repository.Create(GetTenantFromContext(c), object)
+
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+					"error": err,
+				})
+			} else {
+				c.JSON(http.StatusCreated, createdObject)
+			}
+		}
 	}
 }
 
 func updateResource(repository *Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		object := reflect.New(repository.DomainType).Interface()
+		if c.BindJSON(&object) == nil {
+			if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
+				if objectId := GetFieldByName(object, "ID").Uint(); objectId == id {
+					updatedObject, err := repository.Update(GetTenantFromContext(c), object)
 
+					if err != nil {
+						c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+							"error": err,
+						})
+					} else {
+						c.JSON(http.StatusOK, updatedObject)
+					}
+				} else {
+					c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+						"error": fmt.Sprintf("Id on path is different from id in object: %v != %v", id, objectId),
+					})
+				}
+			} else {
+				abortOnIdParsingError(c, id)
+			}
+		}
 	}
 }
 
 func deleteResource(repository *Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
-
+		if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
+			if err = repository.Delete(GetTenantFromContext(c), id); err == nil {
+				c.Status(http.StatusNoContent)
+			} else {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+					"error": err,
+				})
+			}
+		} else {
+			abortOnIdParsingError(c, id)
+		}
 	}
+}
+
+func abortOnIdParsingError(c *gin.Context, id uint64) {
+	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+		"error": fmt.Sprintf("Id is not an unsigned integer: %v", id),
+	})
 }

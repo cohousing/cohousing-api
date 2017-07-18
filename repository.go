@@ -21,10 +21,31 @@ func (repository *Repository) GetList(tenant *Tenant) interface{} {
 }
 
 func (repository *Repository) GetById(tenant *Tenant, id uint64) (interface{}, error) {
-	item := reflect.New(repository.DomainType).Interface()
-	if err := getTenantDB(tenant).First(item, id).Error; err == nil {
-		return item, nil
+	object := reflect.New(repository.DomainType).Interface()
+	if err := getTenantDB(tenant).First(object, id).Error; err == nil {
+		return object, nil
 	} else {
 		return nil, err
 	}
+}
+
+func (repository *Repository) Create(tenant *Tenant, object interface{}) (interface{}, error) {
+	if err := getTenantDB(tenant).Create(object).Error; err == nil {
+		return object, nil
+	} else {
+		return nil, err
+	}
+}
+
+func (repository *Repository) Update(tenant *Tenant, object interface{}) (interface{}, error) {
+	if err := getTenantDB(tenant).Save(object).Error; err == nil {
+		return object, nil
+	} else {
+		return nil, err
+	}
+}
+
+func (repository *Repository) Delete(tenant *Tenant, id uint64) error {
+	item := reflect.New(repository.DomainType).Interface()
+	return getTenantDB(tenant).Delete(item, id).Error
 }
