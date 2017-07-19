@@ -1,7 +1,5 @@
-sudo: required
-
-services:
-  - docker
+sudo: true
+dist: trusty
 
 language: go
 
@@ -10,14 +8,22 @@ go:
 
 go_import_path: github.com/cohousing/cohousing-api
 
-install:
-  - go get -u github.com/kardianos/govendor
-  - govendor sync
-
-script:
-  - govendor test -coverprofile=coverage.txt -covermode=atomic
-  - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cohousing-api .
-  - docker build -t "cohousing-api:latest" .
-
+jobs:
+  include:
+    - stage: install dependencies
+      install:
+      - go get -u github.com/kardianos/govendor
+      - govendor sync
+    - stage: build executable
+      script: CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cohousing-api .
+    - stage: test
+      script: govendor test -coverprofile=coverage.txt -covermode=atomic
+    - stage: build docker image
+      script:
+      - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+      - docker build -t cohousing-api .
+      - docker images
+      - docker tag cohousing-api cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
+      - docker push cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
 after_success:
   - bash <(curl -s https://codecov.io/bash)
