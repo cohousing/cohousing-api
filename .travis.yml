@@ -1,23 +1,30 @@
 sudo: true
 dist: trusty
 
-language: go
-
-go:
-  - 1.8
-
-go_import_path: github.com/cohousing/cohousing-api
-
 jobs:
   include:
     - stage: install dependencies
       install:
       - go get -u github.com/kardianos/govendor
       - govendor sync
+      language: go
+      go:
+      - 1.8
+      go_import_path: github.com/cohousing/cohousing-api
     - stage: build executable
+      language: go
+      go:
+      - 1.8
+      go_import_path: github.com/cohousing/cohousing-api
       script: CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cohousing-api .
     - stage: test
+      language: go
+      go:
+      - 1.8
+      go_import_path: github.com/cohousing/cohousing-api
       script: govendor test -coverprofile=coverage.txt -covermode=atomic
+      after_success:
+      - bash <(curl -s https://codecov.io/bash)
     - stage: build docker image
       script:
       - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
@@ -25,5 +32,3 @@ jobs:
       - docker images
       - docker tag cohousing-api cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
       - docker push cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
