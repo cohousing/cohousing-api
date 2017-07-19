@@ -26,3 +26,18 @@ after_success:
   - bash <(curl -s https://codecov.io/bash)
   - docker tag cohousing-api cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
   - docker push cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
+
+addons:
+  ssh_known_hosts: $DEPLOY_SERVER
+
+before_deploy:
+  - openssl aes-256-cbc -K $encrypted_720e6efdc317_key -iv $encrypted_720e6efdc317_iv -in deploy_rsa.enc -out /tmp/deploy_rsa -d
+  - eval "$(ssh-agent -s)"
+  - chmod 600 /tmp/deploy_rsa
+  - ssh-add /tmp/deploy_rsa
+
+deploy:
+  provider: script
+  script: ssh $DEPLOY_USER@$DEPLOY_SERVER '/build/upgrade_cohousing_api.sh'
+  on:
+    branch: master
