@@ -28,5 +28,5 @@ after_success:
 before_deploy:
   - docker tag cohousing-api cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
 
-deploy:
+after_deploy:
   - docker push cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
