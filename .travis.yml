@@ -38,6 +38,6 @@ before_deploy:
 
 deploy:
   provider: script
-  script: ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_SERVER '/build/upgrade_cohousing_api.sh'
+  script: ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_SERVER '/build/upgrade_cohousing_api.sh ${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER'
   on:
     branch: master
