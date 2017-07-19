@@ -24,9 +24,5 @@ script:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-
-before_deploy:
   - docker tag cohousing-api cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
-
-after_deploy:
   - docker push cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
