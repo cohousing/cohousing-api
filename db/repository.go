@@ -15,12 +15,12 @@ func CreateRepository(domainType reflect.Type) *Repository {
 	}
 }
 
-func (repository *Repository) GetList(tenant *config.Tenant, start, limit int) (interface{}, int) {
+func (repository *Repository) GetList(tenant *config.Tenant, lookupObject interface{}, start, limit int) (interface{}, int) {
 	list := reflect.New(reflect.SliceOf(repository.DomainType)).Interface()
 	var count int
-	GetTenantDB(tenant).Model(reflect.New(repository.DomainType).Interface()).Count(&count)
+	GetTenantDB(tenant).Model(reflect.New(repository.DomainType).Interface()).Where(lookupObject).Count(&count)
 	if count > 0 {
-		GetTenantDB(tenant).Offset(start).Limit(limit).Find(list)
+		GetTenantDB(tenant).Where(lookupObject).Offset(start).Limit(limit).Find(list)
 	}
 	return list, count
 }

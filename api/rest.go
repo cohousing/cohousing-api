@@ -1,6 +1,8 @@
 package api
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/cohousing/cohousing-api/db"
 	"github.com/cohousing/cohousing-api/domain"
@@ -8,8 +10,10 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/jinzhu/gorm"
 	"net/http"
+	"os"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -34,14 +38,8 @@ func ConfigureBasicTenantEndpoint(router *gin.RouterGroup, path string, domain i
 
 func getResourceList(linkFactory LinkFactory, basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var page int
-		if pageInt, err := strconv.ParseUint(c.DefaultQuery("page", "1"), 10, 32); err == nil {
-			page = int(pageInt)
-		}
-		if page < 1 {
-			page = 1
-		}
-		list, count := repository.GetList(GetTenantFromContext(c), getStartRecord(page, RecordsPerPage), RecordsPerPage)
+		lookupObject, page := parseQuery(c, repository.DomainType)
+		list, count := repository.GetList(GetTenantFromContext(c), lookupObject, getStartRecord(page, RecordsPerPage), RecordsPerPage)
 		valueList := reflect.ValueOf(list).Elem()
 		listLength := valueList.Len()
 		domainList := &ObjectList{
@@ -157,4 +155,47 @@ func abortOnIdParsingError(c *gin.Context, id uint64) {
 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 		"error": fmt.Sprintf("Id is not an unsigned integer: %v", id),
 	})
+}
+
+func parseQuery(c *gin.Context, domainType reflect.Type) (lookupObject interface{}, pageNumber int) {
+	var page int
+	if pageInt, err := strconv.ParseUint(c.DefaultQuery("page", "1"), 10, 32); err == nil {
+		page = int(pageInt)
+	}
+	if page < 1 {
+		page = 1
+	}
+
+	var buffer bytes.Buffer
+	buffer.WriteString("{")
+	queryParams := c.Request.URL.Query()
+	for queryParam, _ := range queryParams {
+		if queryParam != "page" {
+			if buffer.Len() > 1 {
+				buffer.WriteString(",")
+			}
+			buffer.WriteString("\"")
+			buffer.WriteString(strings.Replace(queryParam, "\"", "\\\"", -1))
+			buffer.WriteString("\":")
+
+			queryValue := queryParams.Get(queryParam)
+			_, err := strconv.ParseInt(queryValue, 10, 64)
+			if err == nil {
+				buffer.WriteString(queryValue)
+			} else {
+				buffer.WriteString("\"")
+				buffer.WriteString(strings.Replace(queryValue, "\"", "\\\"", -1))
+				buffer.WriteString("\"")
+			}
+		}
+	}
+	buffer.WriteString("}")
+
+	lookupObject = reflect.New(domainType).Interface()
+	err := json.Unmarshal(buffer.Bytes(), lookupObject)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing JSON: %v\n", err)
+	}
+
+	return lookupObject, page
 }
