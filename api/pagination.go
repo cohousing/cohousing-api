@@ -6,7 +6,9 @@ import (
 )
 
 type ObjectList struct {
-	Objects []interface{} `json:"objects"`
+	CurrentPage int
+	Count       int
+	Objects     []interface{} `json:"objects"`
 	domain.DefaultHalResource
 }
 

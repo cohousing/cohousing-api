@@ -14,8 +14,6 @@ type RelType string
 
 type HalResource interface {
 	AddLink(rel RelType, href string)
-
-	Populate(detailed bool)
 }
 
 type DefaultHalResource struct {

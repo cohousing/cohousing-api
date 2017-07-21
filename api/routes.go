@@ -12,6 +12,7 @@ func CreateRouter() {
 
 	CreateApartmentRoutes(apiV1)
 	CreateResidentRoutes(apiV1)
+	CreateFixtureRoutes(apiV1)
 
 	router.Run(":8080")
 }

@@ -29,6 +29,7 @@ func GetTenantDB(tenant *config.Tenant) *gorm.DB {
 		if err = MigrateTenantDB(db.DB()); err != nil {
 			panic(err)
 		}
+		db.LogMode(true)
 	}
 	return db
 }
