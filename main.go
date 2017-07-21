@@ -1,7 +1,15 @@
 package main
 
-func main() {
-	Configure()
+import (
+	"github.com/cohousing/cohousing-api/api"
+	"github.com/cohousing/cohousing-api/config"
+	"github.com/cohousing/cohousing-api/db"
+)
 
-	CreateRouter()
+func main() {
+	db.InitDB()
+
+	config.Configure()
+
+	api.CreateRouter()
 }

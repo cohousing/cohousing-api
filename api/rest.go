@@ -1,37 +1,61 @@
-package main
+package api
 
 import (
 	"fmt"
+	"github.com/cohousing/cohousing-api/db"
+	"github.com/cohousing/cohousing-api/domain"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/jinzhu/gorm"
 	"net/http"
 	"reflect"
 	"strconv"
 )
 
-func ConfigureBasicTenantEndpoint(router *gin.RouterGroup, path string, domain interface{}) {
+func ConfigureBasicTenantEndpoint(router *gin.RouterGroup, path string, domain interface{}) *gin.RouterGroup {
 	tenantEndpoint := router.Group(path, MustBeTenant())
 
-	repository := CreateRepository(reflect.TypeOf(domain))
+	repository := db.CreateRepository(reflect.TypeOf(domain))
 
-	tenantEndpoint.GET("/", getResourceList(repository))
-	tenantEndpoint.GET("/:id", getResourceById(repository))
-	tenantEndpoint.POST("/", createNewResource(repository))
-	tenantEndpoint.PUT("/:id", updateResource(repository))
-	tenantEndpoint.DELETE("/:id", deleteResource(repository))
+	tenantEndpoint.GET("/", getResourceList(tenantEndpoint.BasePath(), repository))
+	tenantEndpoint.GET("/:id", getResourceById(tenantEndpoint.BasePath(), repository))
+	tenantEndpoint.POST("/", createNewResource(tenantEndpoint.BasePath(), repository))
+	tenantEndpoint.PUT("/:id", updateResource(tenantEndpoint.BasePath(), repository))
+	tenantEndpoint.DELETE("/:id", deleteResource(tenantEndpoint.BasePath(), repository))
+
+	return tenantEndpoint
 }
 
-func getResourceList(repository *Repository) gin.HandlerFunc {
+func getResourceList(basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		list := repository.GetList(GetTenantFromContext(c))
-		c.JSON(http.StatusOK, list)
+		valueList := reflect.ValueOf(list).Elem()
+		listLength := valueList.Len()
+		domainList := &ObjectList{
+			Objects: make([]interface{}, listLength),
+		}
+		for i := 0; i < listLength; i++ {
+			object := valueList.Index(i).Addr().Interface()
+			domainList.Objects[i] = object
+			halResource, ok := object.(domain.HalResource)
+			if ok {
+				halResource.Populate(false)
+			}
+		}
+		addPaginationLinks(domainList, basePath, 1, 1, 2)
+
+		c.JSON(http.StatusOK, domainList)
 	}
 }
 
-func getResourceById(repository *Repository) gin.HandlerFunc {
+func getResourceById(basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
 			if object, err := repository.GetById(GetTenantFromContext(c), id); err == nil {
+				halResource, ok := object.(domain.HalResource)
+				if ok {
+					halResource.Populate(true)
+				}
 				c.JSON(http.StatusOK, object)
 			} else if err == gorm.ErrRecordNotFound {
 				c.AbortWithStatus(http.StatusNotFound)
@@ -46,10 +70,10 @@ func getResourceById(repository *Repository) gin.HandlerFunc {
 	}
 }
 
-func createNewResource(repository *Repository) gin.HandlerFunc {
+func createNewResource(basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		object := reflect.New(repository.DomainType).Interface()
-		if c.BindJSON(&object) == nil {
+		if err := c.ShouldBindWith(&object, binding.JSON); err == nil {
 
 			createdObject, err := repository.Create(GetTenantFromContext(c), object)
 
@@ -60,11 +84,15 @@ func createNewResource(repository *Repository) gin.HandlerFunc {
 			} else {
 				c.JSON(http.StatusCreated, createdObject)
 			}
+		} else {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error": err,
+			})
 		}
 	}
 }
 
-func updateResource(repository *Repository) gin.HandlerFunc {
+func updateResource(basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		object := reflect.New(repository.DomainType).Interface()
 		if c.BindJSON(&object) == nil {
@@ -91,7 +119,7 @@ func updateResource(repository *Repository) gin.HandlerFunc {
 	}
 }
 
-func deleteResource(repository *Repository) gin.HandlerFunc {
+func deleteResource(basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
 			if err = repository.Delete(GetTenantFromContext(c), id); err == nil {

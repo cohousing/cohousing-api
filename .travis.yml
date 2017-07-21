@@ -10,6 +10,7 @@ go_import_path: github.com/cohousing/cohousing-api
 
 before_install:
   - go get -u github.com/kardianos/govendor
+  - go get -u github.com/jteeuwen/go-bindata/...
 
 install:
   - govendor sync
@@ -18,6 +19,7 @@ before_script:
   - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 
 script:
+  - ./create_dbmigrate_bindata.sh
   - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cohousing-api .
   - govendor test -coverprofile=coverage.txt -covermode=atomic
   - docker build -t cohousing-api .

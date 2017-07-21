@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ var (
 	cacheRefresherDuration time.Duration = 1 * time.Minute
 	tenantRefresherQuitter chan struct{}
 
-	config = struct {
+	Loaded = struct {
 		TenantDomain string
 
 		ConfigDB struct {
@@ -24,7 +24,7 @@ var (
 		}
 	}{}
 
-	tenantsLoaderFunc TenantsLoaderFunc = loadTenantsFromDB
+	TenantsLoader TenantsLoaderFunc
 )
 
 type TenantsLoaderFunc func() []Tenant
@@ -50,7 +50,7 @@ func GetTenantByHost(host string) *Tenant {
 }
 
 func LoadStaticConfiguration() {
-	configor.Load(&config, "config.yml")
+	configor.Load(&Loaded, "config.yml")
 }
 
 func dynamicConfigRefresher() {
@@ -70,7 +70,7 @@ func dynamicConfigRefresher() {
 }
 
 func refreshTenantCache() {
-	tenants := tenantsLoaderFunc()
+	tenants := TenantsLoader()
 
 	newTenantCache := make(map[string]*Tenant)
 	for _, tenant := range tenants {
@@ -83,13 +83,5 @@ func refreshTenantCache() {
 }
 
 func buildTenantDomain(context string) string {
-	return fmt.Sprintf(config.TenantDomain, context)
-}
-
-func loadTenantsFromDB() []Tenant {
-	var tenants []Tenant
-
-	getConfDB().Find(&tenants)
-
-	return tenants
+	return fmt.Sprintf(Loaded.TenantDomain, context)
 }

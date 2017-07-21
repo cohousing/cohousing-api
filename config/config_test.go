@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"testing"
@@ -29,13 +29,13 @@ var (
 func TestLoadStaticConfiguration(t *testing.T) {
 	LoadStaticConfiguration()
 
-	if config.TenantDomain != "%s.cohousing.nu" {
+	if Loaded.TenantDomain != "%s.cohousing.nu" {
 		t.Error("Configuration file not loaded correctly")
 	}
 }
 
 func TestRefreshTenantsCache(t *testing.T) {
-	tenantsLoaderFunc = tenantsLoaderFuncMock
+	TenantsLoader = tenantsLoaderFuncMock
 	tenantCache = nil
 
 	refreshTenantCache()
@@ -46,7 +46,7 @@ func TestRefreshTenantsCache(t *testing.T) {
 }
 
 func TestGetTenantByHost(t *testing.T) {
-	tenantsLoaderFunc = tenantsLoaderFuncMock
+	TenantsLoader = tenantsLoaderFuncMock
 	tenantCache = nil
 
 	tenant := GetTenantByHost("customurl.example.com")
@@ -59,7 +59,7 @@ func TestGetTenantByHost(t *testing.T) {
 }
 
 func TestDynamicConfigRefresher(t *testing.T) {
-	tenantsLoaderFunc = tenantsLoaderFuncMock
+	TenantsLoader = tenantsLoaderFuncMock
 	tenantCache = nil
 	cacheRefresherDuration = 1 * time.Second
 

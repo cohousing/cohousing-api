@@ -1,7 +1,8 @@
-package main
+package api
 
 import (
 	"fmt"
+	"github.com/cohousing/cohousing-api/config"
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
@@ -27,7 +28,7 @@ func ContextResolver() gin.HandlerFunc {
 			}
 		}
 
-		tenant := GetTenantByHost(host)
+		tenant := config.GetTenantByHost(host)
 		if tenant != nil {
 			c.Set(GIN_TENANT, tenant)
 			c.Set(GIN_IS_TENANT, true)
@@ -39,8 +40,8 @@ func ContextResolver() gin.HandlerFunc {
 	}
 }
 
-func GetTenantFromContext(c *gin.Context) *Tenant {
-	return c.MustGet(GIN_TENANT).(*Tenant)
+func GetTenantFromContext(c *gin.Context) *config.Tenant {
+	return c.MustGet(GIN_TENANT).(*config.Tenant)
 }
 
 func MustBeTenant() gin.HandlerFunc {
