@@ -8,7 +8,7 @@ import (
 	"github.com/cohousing/cohousing-api/domain"
 	adminDomain "github.com/cohousing/cohousing-api/domain/admin"
 	tenantDomain "github.com/cohousing/cohousing-api/domain/tenant"
-	"github.com/gin-contrib/location"
+	"github.com/cohousing/location"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

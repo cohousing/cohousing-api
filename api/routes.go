@@ -4,7 +4,7 @@ import (
 	"github.com/cohousing/cohousing-api/api/admin"
 	"github.com/cohousing/cohousing-api/api/tenant"
 	"github.com/cohousing/cohousing-api/api/utils"
-	"github.com/gin-contrib/location"
+	"github.com/cohousing/location"
 	"github.com/gin-gonic/gin"
 )
 

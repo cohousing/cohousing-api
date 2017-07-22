@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/cohousing/cohousing-api/config"
 	"github.com/cohousing/cohousing-api/domain/admin"
-	"github.com/gin-contrib/location"
+	"github.com/cohousing/location"
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
