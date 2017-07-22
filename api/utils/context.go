@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -77,7 +78,13 @@ func MustBeTenant() gin.HandlerFunc {
 
 func MustBeAdminDomain() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		headers := c.Request.Header
+		for header := range headers {
+			fmt.Fprintf(os.Stdout, "HEADER %s => %s\n", header, headers.Get(header))
+		}
+
 		url := location.Get(c)
+		fmt.Fprintf(os.Stdout, "URL: %v\n", url)
 		host, err := trimHost(url.Host)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
