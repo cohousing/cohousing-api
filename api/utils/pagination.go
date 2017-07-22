@@ -1,4 +1,4 @@
-package api
+package utils
 
 import (
 	fmt "fmt"
@@ -12,7 +12,7 @@ type ObjectList struct {
 	domain.DefaultHalResource
 }
 
-func addPaginationLinks(objectList *ObjectList, baseUrl string, currentPage, recordsPerPage, totalRecordCount int) {
+func AddPaginationLinks(objectList *ObjectList, baseUrl string, currentPage, recordsPerPage, totalRecordCount int) {
 	var firstPage int = 1
 
 	var lastPage int = totalRecordCount / recordsPerPage
@@ -45,6 +45,6 @@ func generatePaginationUrl(baseUrl string, page int) string {
 	}
 }
 
-func getStartRecord(currentPage, recordsPerPage int) int {
+func GetStartRecord(currentPage, recordsPerPage int) int {
 	return (currentPage - 1) * recordsPerPage
 }

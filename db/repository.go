@@ -1,56 +1,61 @@
 package db
 
 import (
-	"github.com/cohousing/cohousing-api/config"
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"reflect"
 )
 
+type DBFactory func(c *gin.Context) *gorm.DB
+
 type Repository struct {
 	DomainType reflect.Type
+	DBFactory  DBFactory
 }
 
-func CreateRepository(domainType reflect.Type) *Repository {
+func CreateRepository(domainType reflect.Type, dbFactory DBFactory) *Repository {
 	return &Repository{
 		DomainType: domainType,
+		DBFactory:  dbFactory,
 	}
 }
 
-func (repository *Repository) GetList(tenant *config.Tenant, lookupObject interface{}, start, limit int) (interface{}, int) {
+func (repository *Repository) GetList(c *gin.Context, lookupObject interface{}, start, limit int) (interface{}, int) {
 	list := reflect.New(reflect.SliceOf(repository.DomainType)).Interface()
 	var count int
-	GetTenantDB(tenant).Model(reflect.New(repository.DomainType).Interface()).Where(lookupObject).Count(&count)
+	repository.DBFactory(c).Model(reflect.New(repository.DomainType).Interface()).Where(lookupObject).Count(&count)
 	if count > 0 {
-		GetTenantDB(tenant).Where(lookupObject).Offset(start).Limit(limit).Find(list)
+		repository.DBFactory(c).Where(lookupObject).Offset(start).Limit(limit).Find(list)
 	}
 	return list, count
 }
 
-func (repository *Repository) GetById(tenant *config.Tenant, id uint64) (interface{}, error) {
+func (repository *Repository) GetById(c *gin.Context, id uint64) (interface{}, error) {
 	object := reflect.New(repository.DomainType).Interface()
-	if err := GetTenantDB(tenant).First(object, id).Error; err == nil {
+	if err := repository.DBFactory(c).First(object, id).Error; err == nil {
 		return object, nil
 	} else {
 		return nil, err
 	}
 }
 
-func (repository *Repository) Create(tenant *config.Tenant, object interface{}) (interface{}, error) {
-	if err := GetTenantDB(tenant).Create(object).Error; err == nil {
+func (repository *Repository) Create(c *gin.Context, object interface{}) (interface{}, error) {
+	if err := repository.DBFactory(c).Create(object).Error; err == nil {
 		return object, nil
 	} else {
 		return nil, err
 	}
 }
 
-func (repository *Repository) Update(tenant *config.Tenant, object interface{}) (interface{}, error) {
-	if err := GetTenantDB(tenant).Save(object).Error; err == nil {
+func (repository *Repository) Update(c *gin.Context, object interface{}) (interface{}, error) {
+	if err := repository.DBFactory(c).Save(object).Error; err == nil {
 		return object, nil
 	} else {
 		return nil, err
 	}
 }
 
-func (repository *Repository) Delete(tenant *config.Tenant, id uint64) error {
+func (repository *Repository) Delete(c *gin.Context, id uint64) error {
 	item := reflect.New(repository.DomainType).Interface()
-	return GetTenantDB(tenant).Delete(item, id).Error
+	return repository.DBFactory(c).Delete(item, id).Error
 }

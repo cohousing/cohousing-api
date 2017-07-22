@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"github.com/cohousing/cohousing-api/config"
+	"github.com/cohousing/cohousing-api/domain/admin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
@@ -16,10 +17,11 @@ func InitDB() {
 	config.TenantsLoader = loadTenantsFromDB
 }
 
-func GetTenantDB(tenant *config.Tenant) *gorm.DB {
+func GetTenantDB(tenant *admin.Tenant) *gorm.DB {
 	db := dbCache[tenant.Context]
 	if db == nil {
-		connectionString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", config.Loaded.ConfigDB.User, config.Loaded.ConfigDB.Password, config.Loaded.ConfigDB.Host, config.Loaded.ConfigDB.Port, tenant.Context)
+		cfg := config.GetConfig()
+		connectionString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", cfg.ConfigDB.User, cfg.ConfigDB.Password, cfg.ConfigDB.Host, cfg.ConfigDB.Port, tenant.Context)
 		var err error
 		db, err = gorm.Open("mysql", connectionString)
 		if err != nil {
@@ -37,7 +39,8 @@ func GetTenantDB(tenant *config.Tenant) *gorm.DB {
 func GetConfDB() *gorm.DB {
 	if confDB == nil {
 		var err error
-		connectionString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", config.Loaded.ConfigDB.User, config.Loaded.ConfigDB.Password, config.Loaded.ConfigDB.Host, config.Loaded.ConfigDB.Port, config.Loaded.ConfigDB.Name)
+		cfg := config.GetConfig()
+		connectionString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", cfg.ConfigDB.User, cfg.ConfigDB.Password, cfg.ConfigDB.Host, cfg.ConfigDB.Port, cfg.ConfigDB.Name)
 		confDB, err = gorm.Open("mysql", connectionString)
 		if err != nil {
 			panic(err)
@@ -49,8 +52,8 @@ func GetConfDB() *gorm.DB {
 	return confDB
 }
 
-func loadTenantsFromDB() []config.Tenant {
-	var tenants []config.Tenant
+func loadTenantsFromDB() []admin.Tenant {
+	var tenants []admin.Tenant
 
 	GetConfDB().Find(&tenants)
 

@@ -1,4 +1,4 @@
-package api
+package utils
 
 import (
 	"bytes"
@@ -22,24 +22,24 @@ var (
 
 type LinkFactory func(halResource domain.HalResource, basePath string, detailed bool)
 
-func ConfigureBasicTenantEndpoint(router *gin.RouterGroup, path string, domain interface{}, linkFactory LinkFactory) *gin.RouterGroup {
-	tenantEndpoint := router.Group(path, MustBeTenant())
+func ConfigureBasicEndpoint(router *gin.RouterGroup, path string, domain interface{}, linkFactory LinkFactory, dbFactory db.DBFactory, handlers ...gin.HandlerFunc) *gin.RouterGroup {
+	endpoint := router.Group(path, handlers...)
 
-	repository := db.CreateRepository(reflect.TypeOf(domain))
+	repository := db.CreateRepository(reflect.TypeOf(domain), dbFactory)
 
-	tenantEndpoint.GET("/", getResourceList(linkFactory, tenantEndpoint.BasePath(), repository))
-	tenantEndpoint.GET("/:id", getResourceById(linkFactory, tenantEndpoint.BasePath(), repository))
-	tenantEndpoint.POST("/", createNewResource(linkFactory, tenantEndpoint.BasePath(), repository))
-	tenantEndpoint.PUT("/:id", updateResource(linkFactory, tenantEndpoint.BasePath(), repository))
-	tenantEndpoint.DELETE("/:id", deleteResource(repository))
+	endpoint.GET("/", getResourceList(linkFactory, endpoint.BasePath(), repository))
+	endpoint.GET("/:id", getResourceById(linkFactory, endpoint.BasePath(), repository))
+	endpoint.POST("/", createNewResource(linkFactory, endpoint.BasePath(), repository))
+	endpoint.PUT("/:id", updateResource(linkFactory, endpoint.BasePath(), repository))
+	endpoint.DELETE("/:id", deleteResource(repository))
 
-	return tenantEndpoint
+	return endpoint
 }
 
 func getResourceList(linkFactory LinkFactory, basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		lookupObject, page := parseQuery(c, repository.DomainType)
-		list, count := repository.GetList(GetTenantFromContext(c), lookupObject, getStartRecord(page, RecordsPerPage), RecordsPerPage)
+		list, count := repository.GetList(c, lookupObject, GetStartRecord(page, RecordsPerPage), RecordsPerPage)
 		valueList := reflect.ValueOf(list).Elem()
 		listLength := valueList.Len()
 		domainList := &ObjectList{
@@ -52,7 +52,7 @@ func getResourceList(linkFactory LinkFactory, basePath string, repository *db.Re
 			domainList.Objects[i] = object
 			addLinks(object, linkFactory, basePath, false)
 		}
-		addPaginationLinks(domainList, basePath, page, RecordsPerPage, count)
+		AddPaginationLinks(domainList, basePath, page, RecordsPerPage, count)
 
 		c.JSON(http.StatusOK, domainList)
 	}
@@ -61,7 +61,7 @@ func getResourceList(linkFactory LinkFactory, basePath string, repository *db.Re
 func getResourceById(linkFactory LinkFactory, basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
-			if object, err := repository.GetById(GetTenantFromContext(c), id); err == nil {
+			if object, err := repository.GetById(c, id); err == nil {
 				addLinks(object, linkFactory, basePath, true)
 				c.JSON(http.StatusOK, object)
 			} else if err == gorm.ErrRecordNotFound {
@@ -82,7 +82,7 @@ func createNewResource(linkFactory LinkFactory, basePath string, repository *db.
 		object := reflect.New(repository.DomainType).Interface()
 		if err := c.ShouldBindWith(&object, binding.JSON); err == nil {
 
-			createdObject, err := repository.Create(GetTenantFromContext(c), object)
+			createdObject, err := repository.Create(c, object)
 
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -106,7 +106,7 @@ func updateResource(linkFactory LinkFactory, basePath string, repository *db.Rep
 		if c.BindJSON(&object) == nil {
 			if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
 				if objectId := GetFieldByName(object, "ID").Uint(); objectId == id {
-					updatedObject, err := repository.Update(GetTenantFromContext(c), object)
+					updatedObject, err := repository.Update(c, object)
 
 					if err != nil {
 						c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -131,7 +131,7 @@ func updateResource(linkFactory LinkFactory, basePath string, repository *db.Rep
 func deleteResource(repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
-			if err = repository.Delete(GetTenantFromContext(c), id); err == nil {
+			if err = repository.Delete(c, id); err == nil {
 				c.Status(http.StatusNoContent)
 			} else {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -169,7 +169,7 @@ func parseQuery(c *gin.Context, domainType reflect.Type) (lookupObject interface
 	var buffer bytes.Buffer
 	buffer.WriteString("{")
 	queryParams := c.Request.URL.Query()
-	for queryParam, _ := range queryParams {
+	for queryParam := range queryParams {
 		if queryParam != "page" {
 			if buffer.Len() > 1 {
 				buffer.WriteString(",")

@@ -2,39 +2,40 @@ package config
 
 import (
 	"fmt"
+	"github.com/cohousing/cohousing-api/domain/admin"
 	"github.com/jinzhu/configor"
-	"github.com/jinzhu/gorm"
 	"time"
 )
 
 var (
-	tenantCache            map[string]*Tenant
+	tenantCache            map[string]*admin.Tenant
 	cacheRefresherDuration time.Duration = 1 * time.Minute
 	tenantRefresherQuitter chan struct{}
 
-	Loaded = struct {
-		TenantDomain string
-
-		ConfigDB struct {
-			User     string
-			Password string
-			Host     string
-			Port     uint
-			Name     string
-		}
-	}{}
+	loaded = Config{}
 
 	TenantsLoader TenantsLoaderFunc
 )
 
-type TenantsLoaderFunc func() []Tenant
+type Config struct {
+	TenantDomain string
 
-type Tenant struct {
-	gorm.Model
-	Context   string `gorm:"size:100"`
-	Name      string
-	CustomUrl string
+	AdminDomain string
+
+	ConfigDB struct {
+		User     string
+		Password string
+		Host     string
+		Port     uint
+		Name     string
+	}
 }
+
+func GetConfig() *Config {
+	return &loaded
+}
+
+type TenantsLoaderFunc func() []admin.Tenant
 
 func Configure() {
 	LoadStaticConfiguration()
@@ -42,7 +43,7 @@ func Configure() {
 	dynamicConfigRefresher()
 }
 
-func GetTenantByHost(host string) *Tenant {
+func GetTenantByHost(host string) *admin.Tenant {
 	if tenantCache == nil {
 		refreshTenantCache()
 	}
@@ -50,7 +51,7 @@ func GetTenantByHost(host string) *Tenant {
 }
 
 func LoadStaticConfiguration() {
-	configor.Load(&Loaded, "config.yml")
+	configor.Load(&loaded, "config.yml")
 }
 
 func dynamicConfigRefresher() {
@@ -72,9 +73,11 @@ func dynamicConfigRefresher() {
 func refreshTenantCache() {
 	tenants := TenantsLoader()
 
-	newTenantCache := make(map[string]*Tenant)
+	newTenantCache := make(map[string]*admin.Tenant)
 	for _, tenant := range tenants {
-		newTenantCache[buildTenantDomain(tenant.Context)] = &tenant
+		tenantUrl := buildTenantDomain(tenant.Context)
+		(&tenant).TenantUrl = tenantUrl
+		newTenantCache[tenantUrl] = &tenant
 		if tenant.CustomUrl != "" {
 			newTenantCache[tenant.CustomUrl] = &tenant
 		}
@@ -83,5 +86,5 @@ func refreshTenantCache() {
 }
 
 func buildTenantDomain(context string) string {
-	return fmt.Sprintf(Loaded.TenantDomain, context)
+	return fmt.Sprintf(GetConfig().TenantDomain, context)
 }
