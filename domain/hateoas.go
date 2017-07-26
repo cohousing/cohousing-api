@@ -2,6 +2,7 @@ package domain
 
 const (
 	REL_SELF   RelType = "self"
+	REL_CREATE RelType = "create"
 	REL_UPDATE RelType = "update"
 	REL_DELETE RelType = "delete"
 	REL_NEXT   RelType = "next"
@@ -17,7 +18,7 @@ type HalResource interface {
 }
 
 type DefaultHalResource struct {
-	Links map[RelType]Link `sql:"-" json:"_links,omitempty"`
+	Links map[RelType]Link `gorm:"-" json:"_links,omitempty"`
 }
 
 func (lr *DefaultHalResource) AddLink(rel RelType, href string) {

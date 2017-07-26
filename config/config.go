@@ -11,6 +11,7 @@ var (
 	tenantCache            map[string]*admin.Tenant
 	cacheRefresherDuration time.Duration = 1 * time.Minute
 	tenantRefresherQuitter chan struct{}
+	configFilePath         string = "config.yml"
 
 	loaded = Config{}
 
@@ -51,7 +52,7 @@ func GetTenantByHost(host string) *admin.Tenant {
 }
 
 func LoadStaticConfiguration() {
-	configor.Load(&loaded, "config.yml")
+	configor.Load(&loaded, configFilePath)
 }
 
 func dynamicConfigRefresher() {

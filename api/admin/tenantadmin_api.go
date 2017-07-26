@@ -2,6 +2,7 @@ package admin
 
 import (
 	"fmt"
+	"github.com/cohousing/cohousing-api/api/utils"
 	"github.com/cohousing/cohousing-api/db"
 	"github.com/cohousing/cohousing-api/domain"
 	"github.com/cohousing/cohousing-api/domain/admin"
@@ -13,7 +14,13 @@ var (
 )
 
 func CreateTenantAdminRoutes(router *gin.RouterGroup, dbFactory db.DBFactory) {
-	endpoint := ConfigureBasicAdminEndpoint(router, "tenants", admin.Tenant{}, tenantAdminLinkFactory, dbFactory)
+	endpoint := ConfigureBasicAdminEndpoint(router, utils.BasicEndpointConfig{
+		Path:           "tenants",
+		Domain:         admin.Tenant{},
+		LinkFactory:    tenantAdminLinkFactory,
+		DBFactory:      dbFactory,
+		RouterHandlers: []gin.HandlerFunc{utils.MustBeAdminDomain()},
+	})
 	TenantAdminBasePath = endpoint.BasePath()
 }
 

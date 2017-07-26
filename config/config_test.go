@@ -1,23 +1,24 @@
 package config
 
 import (
+	"github.com/cohousing/cohousing-api/domain/admin"
 	"testing"
 	"time"
 )
 
 var (
 	origTenantsLoaderFunc TenantsLoaderFunc
-	tenantsLoaderFuncMock TenantsLoaderFunc = func() []Tenant {
-		return []Tenant{
-			Tenant{
+	tenantsLoaderFuncMock TenantsLoaderFunc = func() []admin.Tenant {
+		return []admin.Tenant{
+			admin.Tenant{
 				Context: "tenant1",
 				Name:    "Tenant 1",
 			},
-			Tenant{
+			admin.Tenant{
 				Context: "tenant2",
 				Name:    "Tenant 2",
 			},
-			Tenant{
+			admin.Tenant{
 				Context:   "tenant3",
 				Name:      "Tenant 3",
 				CustomUrl: "customurl.example.com",
@@ -27,9 +28,11 @@ var (
 )
 
 func TestLoadStaticConfiguration(t *testing.T) {
+	configFilePath = "../config.yml"
+
 	LoadStaticConfiguration()
 
-	if Loaded.TenantDomain != "%s.cohousing.nu" {
+	if GetConfig().TenantDomain != "%s.cohousing.nu" {
 		t.Error("Configuration file not loaded correctly")
 	}
 }

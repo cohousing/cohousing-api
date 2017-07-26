@@ -2,11 +2,12 @@
 CREATE TABLE apartments
 (
   id         INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  created_at TIMESTAMP    NULL,
-  updated_at TIMESTAMP    NULL,
+  created_at TIMESTAMP    NOT NULL,
+  updated_at TIMESTAMP    NOT NULL,
   deleted_at TIMESTAMP    NULL,
   address    VARCHAR(255) NULL
-);
+)
+  ENGINE = InnoDB;
 
 ALTER TABLE apartments
   ADD INDEX idx_apartments_deleted_at (deleted_at);
@@ -14,14 +15,15 @@ ALTER TABLE apartments
 CREATE TABLE residents
 (
   id            INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  created_at    TIMESTAMP        NULL,
-  updated_at    TIMESTAMP        NULL,
+  created_at    TIMESTAMP        NOT NULL,
+  updated_at    TIMESTAMP        NOT NULL,
   deleted_at    TIMESTAMP        NULL,
   name          VARCHAR(255)     NULL,
   phone_number  VARCHAR(255)     NULL,
   email_address VARCHAR(255)     NULL,
   apartment_id  INT(10) UNSIGNED NULL
-);
+)
+  ENGINE = InnoDB;
 
 ALTER TABLE residents
   ADD INDEX idx_residents_deleted_at (deleted_at),

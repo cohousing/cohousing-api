@@ -22,16 +22,29 @@ var (
 
 type LinkFactory func(halResource domain.HalResource, basePath string, detailed bool)
 
-func ConfigureBasicEndpoint(router *gin.RouterGroup, path string, domain interface{}, linkFactory LinkFactory, dbFactory db.DBFactory, handlers ...gin.HandlerFunc) *gin.RouterGroup {
-	endpoint := router.Group(path, handlers...)
+type BasicEndpointConfig struct {
+	Path            string
+	Domain          interface{}
+	LinkFactory     LinkFactory
+	DBFactory       db.DBFactory
+	RouterHandlers  []gin.HandlerFunc
+	GetListHandlers []gin.HandlerFunc
+	GetHandlers     []gin.HandlerFunc
+	CreateHandlers  []gin.HandlerFunc
+	UpdateHandlers  []gin.HandlerFunc
+	DeleteHandlers  []gin.HandlerFunc
+}
 
-	repository := db.CreateRepository(reflect.TypeOf(domain), dbFactory)
+func ConfigureBasicEndpoint(router *gin.RouterGroup, config BasicEndpointConfig) *gin.RouterGroup {
+	endpoint := router.Group(config.Path, config.RouterHandlers...)
 
-	endpoint.GET("/", getResourceList(linkFactory, endpoint.BasePath(), repository))
-	endpoint.GET("/:id", getResourceById(linkFactory, endpoint.BasePath(), repository))
-	endpoint.POST("/", createNewResource(linkFactory, endpoint.BasePath(), repository))
-	endpoint.PUT("/:id", updateResource(linkFactory, endpoint.BasePath(), repository))
-	endpoint.DELETE("/:id", deleteResource(repository))
+	repository := db.CreateRepository(reflect.TypeOf(config.Domain), config.DBFactory)
+
+	endpoint.GET("/", append(config.GetListHandlers, getResourceList(config.LinkFactory, endpoint.BasePath(), repository))...)
+	endpoint.GET("/:id", append(config.GetHandlers, getResourceById(config.LinkFactory, endpoint.BasePath(), repository))...)
+	endpoint.POST("/", append(config.CreateHandlers, createNewResource(config.LinkFactory, endpoint.BasePath(), repository))...)
+	endpoint.PUT("/:id", append(config.UpdateHandlers, updateResource(config.LinkFactory, endpoint.BasePath(), repository))...)
+	endpoint.DELETE("/:id", append(config.DeleteHandlers, deleteResource(repository))...)
 
 	return endpoint
 }
