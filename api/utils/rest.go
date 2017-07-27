@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cohousing/cohousing-api/db"
-	"github.com/cohousing/cohousing-api/domain"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/jinzhu/gorm"
@@ -20,13 +19,10 @@ var (
 	RecordsPerPage int = 50
 )
 
-type LinkFactory func(halResource domain.HalResource, basePath string, detailed bool)
-
 type BasicEndpointConfig struct {
 	Path            string
 	Domain          interface{}
 	domainType      reflect.Type
-	LinkFactory     LinkFactory
 	DBFactory       db.DBFactory
 	RouterHandlers  []gin.HandlerFunc
 	GetListHandlers []gin.HandlerFunc
@@ -62,7 +58,7 @@ func getResourceList(config BasicEndpointConfig, basePath string, repository *db
 		for i := 0; i < listLength; i++ {
 			object := valueList.Index(i).Addr().Interface()
 			domainList.Objects[i] = object
-			addLinks(object, config.LinkFactory, basePath, false)
+			AddLinks(c, object, basePath, false)
 		}
 
 		c.JSON(http.StatusOK, domainList)
@@ -73,7 +69,7 @@ func getResourceById(config BasicEndpointConfig, basePath string, repository *db
 	return func(c *gin.Context) {
 		if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
 			if object, err := repository.GetById(c, id); err == nil {
-				addLinks(object, config.LinkFactory, basePath, true)
+				AddLinks(c, object, basePath, true)
 				c.JSON(http.StatusOK, object)
 			} else if err == gorm.ErrRecordNotFound {
 				c.AbortWithStatus(http.StatusNotFound)
@@ -100,7 +96,7 @@ func createNewResource(config BasicEndpointConfig, basePath string, repository *
 					"error": err,
 				})
 			} else {
-				addLinks(createdObject, config.LinkFactory, basePath, true)
+				AddLinks(c, createdObject, basePath, true)
 				c.JSON(http.StatusCreated, createdObject)
 			}
 		} else {
@@ -124,7 +120,7 @@ func updateResource(config BasicEndpointConfig, basePath string, repository *db.
 							"error": err,
 						})
 					} else {
-						addLinks(updatedObject, config.LinkFactory, basePath, true)
+						AddLinks(c, updatedObject, basePath, true)
 						c.JSON(http.StatusOK, updatedObject)
 					}
 				} else {
@@ -152,13 +148,6 @@ func deleteResource(repository *db.Repository) gin.HandlerFunc {
 		} else {
 			abortOnIdParsingError(c, id)
 		}
-	}
-}
-
-func addLinks(object interface{}, linkFactory LinkFactory, basePath string, detailed bool) {
-	halResource, ok := object.(domain.HalResource)
-	if ok {
-		linkFactory(halResource, basePath, detailed)
 	}
 }
 

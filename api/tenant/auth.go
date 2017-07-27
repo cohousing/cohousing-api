@@ -107,6 +107,10 @@ func GetUserFromContext(c *gin.Context) *tenant.User {
 	return c.MustGet(GIN_USER).(*tenant.User)
 }
 
+func ResolvePermission(c *gin.Context) tenant.Permission {
+	return GetUserFromContext(c).ResolvePermissions()
+}
+
 func abortWithUnauthenticated(c *gin.Context) {
 	// Credentials doesn't match, we return 401 and abort handlers chain.
 	c.Header("WWW-Authenticate", "Basic realm=Cohousing")

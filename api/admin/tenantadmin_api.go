@@ -17,14 +17,14 @@ func CreateTenantAdminRoutes(router *gin.RouterGroup, dbFactory db.DBFactory) {
 	endpoint := ConfigureBasicAdminEndpoint(router, utils.BasicEndpointConfig{
 		Path:           "tenants",
 		Domain:         admin.Tenant{},
-		LinkFactory:    tenantAdminLinkFactory,
 		DBFactory:      dbFactory,
 		RouterHandlers: []gin.HandlerFunc{utils.MustBeAdminDomain()},
 	})
 	TenantAdminBasePath = endpoint.BasePath()
+	utils.AddLinkFactory(admin.Tenant{}, tenantAdminLinkFactory)
 }
 
-func tenantAdminLinkFactory(halResource domain.HalResource, basePath string, detailed bool) {
+func tenantAdminLinkFactory(c *gin.Context, halResource domain.HalResource, basePath string, detailed bool) {
 	tenant := halResource.(*admin.Tenant)
 	halResource.AddLink(domain.REL_SELF, fmt.Sprintf("%s/%d", basePath, tenant.ID))
 }

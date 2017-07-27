@@ -19,23 +19,29 @@ func CreateUserRoutes(router *gin.RouterGroup, dbFactory db.DBFactory) {
 	endpoint := ConfigureBasicTenantEndpoint(router, utils.BasicEndpointConfig{
 		Path:           "users",
 		Domain:         tenant.User{},
-		LinkFactory:    userLinkFactory,
 		DBFactory:      dbFactory,
 		RouterHandlers: []gin.HandlerFunc{utils.MustBeTenant(), MustAuthenticate()},
 	})
 	UserBasePath = endpoint.BasePath()
 
+	utils.AddLinkFactory(tenant.User{}, userLinkFactory)
+
 	endpoint.GET("/:id/groups", AuthorizeDomainObject(tenant.User{}, PERM_READ), getGroupsForUser(dbFactory))
 }
 
-func userLinkFactory(halResource domain.HalResource, basePath string, detailed bool) {
+func userLinkFactory(c *gin.Context, halResource domain.HalResource, basePath string, detailed bool) {
 	u := halResource.(*tenant.User)
 	u.AddLink(domain.REL_SELF, fmt.Sprintf("%s/%d", basePath, u.ID))
 
 	if detailed {
+		permission := ResolvePermission(c)
+		if permission.UpdateUsers {
+			u.AddLink(domain.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, u.ID))
+		}
+		if permission.DeleteUsers {
+			u.AddLink(domain.REL_DELETE, fmt.Sprintf("%s/%d", basePath, u.ID))
+		}
 		u.AddLink(tenant.REL_GROUPS, fmt.Sprintf("%s/%d/groups", basePath, u.ID))
-		u.AddLink(domain.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, u.ID))
-		u.AddLink(domain.REL_DELETE, fmt.Sprintf("%s/%d", basePath, u.ID))
 	}
 }
 

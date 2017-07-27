@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	REL_USERS  domain.RelType = "users"
 	REL_GROUPS domain.RelType = "groups"
 )
 

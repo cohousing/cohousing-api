@@ -17,20 +17,27 @@ func CreateApartmentRoutes(router *gin.RouterGroup, dbFactory db.DBFactory) {
 	endpoint := ConfigureBasicTenantEndpoint(router, utils.BasicEndpointConfig{
 		Path:           "apartments",
 		Domain:         tenant.Apartment{},
-		LinkFactory:    apartmentLinkFactory,
 		DBFactory:      dbFactory,
 		RouterHandlers: []gin.HandlerFunc{utils.MustBeTenant(), MustAuthenticate()},
 	})
 	ApartmentBasePath = endpoint.BasePath()
+	utils.AddLinkFactory(tenant.Apartment{}, apartmentLinkFactory)
 }
 
-func apartmentLinkFactory(halResource domain.HalResource, basePath string, detailed bool) {
+func apartmentLinkFactory(c *gin.Context, halResource domain.HalResource, basePath string, detailed bool) {
 	apartment := halResource.(*tenant.Apartment)
 	halResource.AddLink(domain.REL_SELF, fmt.Sprintf("%s/%d", basePath, apartment.ID))
 
 	if detailed {
-		halResource.AddLink(domain.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, apartment.ID))
-		halResource.AddLink(domain.REL_DELETE, fmt.Sprintf("%s/%d", basePath, apartment.ID))
-		halResource.AddLink(tenant.REL_RESIDENTS, fmt.Sprintf("%s?apartment_id=%d", ResidentBasePath, apartment.ID))
+		permission := ResolvePermission(c)
+		if permission.UpdateApartments {
+			halResource.AddLink(domain.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, apartment.ID))
+		}
+		if permission.DeleteApartments {
+			halResource.AddLink(domain.REL_DELETE, fmt.Sprintf("%s/%d", basePath, apartment.ID))
+		}
+		if permission.ReadResidents {
+			halResource.AddLink(tenant.REL_RESIDENTS, fmt.Sprintf("%s?apartment_id=%d", ResidentBasePath, apartment.ID))
+		}
 	}
 }

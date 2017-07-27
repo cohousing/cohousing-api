@@ -13,6 +13,6 @@ type Resident struct {
 	PhoneNumber  string    `json:"phone"`
 	EmailAddress string    `json:"email"`
 	Apartment    Apartment `json:"-"`
-	ApartmentID  *uint64   `json:"apartment_id"`
+	ApartmentID  *uint64   `json:"-"`
 	domain.DefaultHalResource
 }
