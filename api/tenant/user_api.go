@@ -1,0 +1,54 @@
+package tenant
+
+import (
+	"fmt"
+	"github.com/cohousing/cohousing-api/api/utils"
+	"github.com/cohousing/cohousing-api/db"
+	"github.com/cohousing/cohousing-api/domain"
+	"github.com/cohousing/cohousing-api/domain/tenant"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"strconv"
+)
+
+var (
+	UserBasePath string
+)
+
+func CreateUserRoutes(router *gin.RouterGroup, dbFactory db.DBFactory) {
+	endpoint := ConfigureBasicTenantEndpoint(router, utils.BasicEndpointConfig{
+		Path:           "users",
+		Domain:         tenant.User{},
+		LinkFactory:    userLinkFactory,
+		DBFactory:      dbFactory,
+		RouterHandlers: []gin.HandlerFunc{utils.MustBeTenant(), MustAuthenticate()},
+	})
+	UserBasePath = endpoint.BasePath()
+
+	endpoint.GET("/:id/groups", AuthorizeDomainObject(tenant.User{}, PERM_READ), getGroupsForUser(dbFactory))
+}
+
+func userLinkFactory(halResource domain.HalResource, basePath string, detailed bool) {
+	u := halResource.(*tenant.User)
+	u.AddLink(domain.REL_SELF, fmt.Sprintf("%s/%d", basePath, u.ID))
+
+	if detailed {
+		u.AddLink(tenant.REL_GROUPS, fmt.Sprintf("%s/%d/groups", basePath, u.ID))
+		u.AddLink(domain.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, u.ID))
+		u.AddLink(domain.REL_DELETE, fmt.Sprintf("%s/%d", basePath, u.ID))
+	}
+}
+
+func getGroupsForUser(dbFactory db.DBFactory) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
+			u := tenant.User{}
+			u.ID = id
+			var groups []tenant.Group
+			var count int
+			dbFactory(c).Model(&u).Related(&groups, "Groups").Count(&count)
+
+			c.JSON(http.StatusOK, groups)
+		}
+	}
+}

@@ -25,6 +25,7 @@ type LinkFactory func(halResource domain.HalResource, basePath string, detailed 
 type BasicEndpointConfig struct {
 	Path            string
 	Domain          interface{}
+	domainType      reflect.Type
 	LinkFactory     LinkFactory
 	DBFactory       db.DBFactory
 	RouterHandlers  []gin.HandlerFunc
@@ -36,46 +37,43 @@ type BasicEndpointConfig struct {
 }
 
 func ConfigureBasicEndpoint(router *gin.RouterGroup, config BasicEndpointConfig) *gin.RouterGroup {
+	config.domainType = reflect.TypeOf(config.Domain)
+
 	endpoint := router.Group(config.Path, config.RouterHandlers...)
 
-	repository := db.CreateRepository(reflect.TypeOf(config.Domain), config.DBFactory)
+	repository := db.CreateRepository(config.domainType, config.DBFactory)
 
-	endpoint.GET("/", append(config.GetListHandlers, getResourceList(config.LinkFactory, endpoint.BasePath(), repository))...)
-	endpoint.GET("/:id", append(config.GetHandlers, getResourceById(config.LinkFactory, endpoint.BasePath(), repository))...)
-	endpoint.POST("/", append(config.CreateHandlers, createNewResource(config.LinkFactory, endpoint.BasePath(), repository))...)
-	endpoint.PUT("/:id", append(config.UpdateHandlers, updateResource(config.LinkFactory, endpoint.BasePath(), repository))...)
+	endpoint.GET("/", append(config.GetListHandlers, getResourceList(config, endpoint.BasePath(), repository))...)
+	endpoint.GET("/:id", append(config.GetHandlers, getResourceById(config, endpoint.BasePath(), repository))...)
+	endpoint.POST("/", append(config.CreateHandlers, createNewResource(config, endpoint.BasePath(), repository))...)
+	endpoint.PUT("/:id", append(config.UpdateHandlers, updateResource(config, endpoint.BasePath(), repository))...)
 	endpoint.DELETE("/:id", append(config.DeleteHandlers, deleteResource(repository))...)
 
 	return endpoint
 }
 
-func getResourceList(linkFactory LinkFactory, basePath string, repository *db.Repository) gin.HandlerFunc {
+func getResourceList(config BasicEndpointConfig, basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		lookupObject, page := parseQuery(c, repository.DomainType)
+		lookupObject, page := parseQuery(c, config.domainType)
 		list, count := repository.GetList(c, lookupObject, GetStartRecord(page, RecordsPerPage), RecordsPerPage)
 		valueList := reflect.ValueOf(list).Elem()
 		listLength := valueList.Len()
-		domainList := &ObjectList{
-			Objects:     make([]interface{}, listLength),
-			Count:       count,
-			CurrentPage: page,
-		}
+		domainList := CreateObjectList(basePath, make([]interface{}, listLength), page, count, RecordsPerPage)
 		for i := 0; i < listLength; i++ {
 			object := valueList.Index(i).Addr().Interface()
 			domainList.Objects[i] = object
-			addLinks(object, linkFactory, basePath, false)
+			addLinks(object, config.LinkFactory, basePath, false)
 		}
-		AddPaginationLinks(domainList, basePath, page, RecordsPerPage, count)
 
 		c.JSON(http.StatusOK, domainList)
 	}
 }
 
-func getResourceById(linkFactory LinkFactory, basePath string, repository *db.Repository) gin.HandlerFunc {
+func getResourceById(config BasicEndpointConfig, basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
 			if object, err := repository.GetById(c, id); err == nil {
-				addLinks(object, linkFactory, basePath, true)
+				addLinks(object, config.LinkFactory, basePath, true)
 				c.JSON(http.StatusOK, object)
 			} else if err == gorm.ErrRecordNotFound {
 				c.AbortWithStatus(http.StatusNotFound)
@@ -90,9 +88,9 @@ func getResourceById(linkFactory LinkFactory, basePath string, repository *db.Re
 	}
 }
 
-func createNewResource(linkFactory LinkFactory, basePath string, repository *db.Repository) gin.HandlerFunc {
+func createNewResource(config BasicEndpointConfig, basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		object := reflect.New(repository.DomainType).Interface()
+		object := reflect.New(config.domainType).Interface()
 		if err := c.ShouldBindWith(&object, binding.JSON); err == nil {
 
 			createdObject, err := repository.Create(c, object)
@@ -102,7 +100,7 @@ func createNewResource(linkFactory LinkFactory, basePath string, repository *db.
 					"error": err,
 				})
 			} else {
-				addLinks(createdObject, linkFactory, basePath, true)
+				addLinks(createdObject, config.LinkFactory, basePath, true)
 				c.JSON(http.StatusCreated, createdObject)
 			}
 		} else {
@@ -113,9 +111,9 @@ func createNewResource(linkFactory LinkFactory, basePath string, repository *db.
 	}
 }
 
-func updateResource(linkFactory LinkFactory, basePath string, repository *db.Repository) gin.HandlerFunc {
+func updateResource(config BasicEndpointConfig, basePath string, repository *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		object := reflect.New(repository.DomainType).Interface()
+		object := reflect.New(config.domainType).Interface()
 		if c.BindJSON(&object) == nil {
 			if id, err := strconv.ParseUint(c.Param("id"), 10, 64); err == nil {
 				if objectId := GetFieldByName(object, "ID").Uint(); objectId == id {
@@ -126,7 +124,7 @@ func updateResource(linkFactory LinkFactory, basePath string, repository *db.Rep
 							"error": err,
 						})
 					} else {
-						addLinks(updatedObject, linkFactory, basePath, true)
+						addLinks(updatedObject, config.LinkFactory, basePath, true)
 						c.JSON(http.StatusOK, updatedObject)
 					}
 				} else {
@@ -171,13 +169,7 @@ func abortOnIdParsingError(c *gin.Context, id uint64) {
 }
 
 func parseQuery(c *gin.Context, domainType reflect.Type) (lookupObject interface{}, pageNumber int) {
-	var page int
-	if pageInt, err := strconv.ParseUint(c.DefaultQuery("page", "1"), 10, 32); err == nil {
-		page = int(pageInt)
-	}
-	if page < 1 {
-		page = 1
-	}
+	page := GetCurrentPage(c)
 
 	var buffer bytes.Buffer
 	buffer.WriteString("{")

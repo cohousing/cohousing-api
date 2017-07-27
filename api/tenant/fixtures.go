@@ -12,7 +12,7 @@ import (
 
 func CreateFixtureRoutes(router *gin.RouterGroup) {
 
-	router.GET("fixtures", utils.MustBeTenant(), func(c *gin.Context) {
+	router.GET("fixtures", utils.MustBeTenant(), MustAuthenticate(), MustBeGlobalAdmin(), func(c *gin.Context) {
 		tenantDB := db.GetTenantDB(utils.GetTenantFromContext(c))
 
 		tenantDB.Exec("DELETE FROM residents")
@@ -40,7 +40,18 @@ func createUsersAndGroups(tenantDB *gorm.DB) {
 	adminGroup := tenant.Group{
 		Name: "Admins",
 	}
-	adminGroup.GlobalAdmin = true
+	adminGroup.CreateResidents = true
+	adminGroup.ReadResidents = true
+	adminGroup.UpdateResidents = true
+	adminGroup.DeleteResidents = true
+	adminGroup.CreateApartments = true
+	adminGroup.ReadApartments = true
+	adminGroup.UpdateApartments = true
+	adminGroup.DeleteApartments = true
+	adminGroup.CreateUsers = true
+	adminGroup.ReadUsers = true
+	adminGroup.UpdateUsers = true
+	adminGroup.DeleteUsers = true
 	tenantDB.Create(&adminGroup)
 
 	// Create "Moderator User" Group

@@ -90,6 +90,19 @@ func AuthorizeDomainObject(domain interface{}, operation AuthOperation) gin.Hand
 	}
 }
 
+func MustBeGlobalAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		u := GetUserFromContext(c)
+		resolvedPermissions := u.ResolvePermissions()
+
+		if resolvedPermissions.GlobalAdmin {
+			c.Next()
+		} else {
+			abortWithUnauthenticated(c)
+		}
+	}
+}
+
 func GetUserFromContext(c *gin.Context) *tenant.User {
 	return c.MustGet(GIN_USER).(*tenant.User)
 }

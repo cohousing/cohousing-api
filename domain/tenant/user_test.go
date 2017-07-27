@@ -89,6 +89,7 @@ func TestPermission_AfterFind(t *testing.T) {
 	p := Permission{}
 	p.Residents = "crud"
 	p.Apartments = "____"
+	p.Users = "____"
 
 	assert.Equal(t, p.CreateResidents, false)
 	assert.Equal(t, p.ReadResidents, false)

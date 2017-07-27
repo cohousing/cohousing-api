@@ -1,8 +1,10 @@
 package utils
 
 import (
-	fmt "fmt"
+	"fmt"
 	"github.com/cohousing/cohousing-api/domain"
+	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 type ObjectList struct {
@@ -12,18 +14,41 @@ type ObjectList struct {
 	domain.DefaultHalResource
 }
 
-func AddPaginationLinks(objectList *ObjectList, baseUrl string, currentPage, recordsPerPage, totalRecordCount int) {
+func CreateObjectList(baseUrl string, objects []interface{}, currentPage, count, recordsPerPage int) ObjectList {
+	objectList := ObjectList{
+		CurrentPage: currentPage,
+		Count:       count,
+		Objects:     objects,
+	}
+
+	AddPaginationLinks(&objectList, baseUrl, recordsPerPage)
+
+	return objectList
+}
+
+func GetCurrentPage(c *gin.Context) int {
+	var page int
+	if pageInt, err := strconv.ParseUint(c.DefaultQuery("page", "1"), 10, 32); err == nil {
+		page = int(pageInt)
+	}
+	if page < 1 {
+		page = 1
+	}
+	return page
+}
+
+func AddPaginationLinks(objectList *ObjectList, baseUrl string, recordsPerPage int) {
 	var firstPage int = 1
 
-	var lastPage int = totalRecordCount / recordsPerPage
+	var lastPage int = objectList.Count / recordsPerPage
 	if lastPage < 1 {
 		lastPage = 1
 	}
 
-	var prevPage int = currentPage - 1
-	var nextPage int = currentPage + 1
+	var prevPage int = objectList.CurrentPage - 1
+	var nextPage int = objectList.CurrentPage + 1
 
-	objectList.AddLink(domain.REL_SELF, generatePaginationUrl(baseUrl, currentPage))
+	objectList.AddLink(domain.REL_SELF, generatePaginationUrl(baseUrl, objectList.CurrentPage))
 
 	if firstPage != lastPage {
 		objectList.AddLink(domain.REL_FIRST, generatePaginationUrl(baseUrl, firstPage))

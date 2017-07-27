@@ -2,6 +2,7 @@
 // sources:
 // db/tenant/1_base.sql
 // db/tenant/2_auth.sql
+// db/tenant/3_tenant_user_api.sql
 // DO NOT EDIT!
 
 package tenant
@@ -109,6 +110,26 @@ func dbTenant2_authSql() (*asset, error) {
 	return a, nil
 }
 
+var _dbTenant3_tenant_user_apiSql = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xd4\x91\x31\xcb\x83\x30\x18\x84\xf7\xfc\x8a\xdb\xfc\x3e\x5a\xb7\x6e\x9d\x52\x93\xd6\x21\x8d\x45\x92\x39\x08\x0d\xe2\xa0\x86\x44\xe9\xdf\x2f\x08\x45\xab\x85\xda\xa9\x74\x7c\xe1\x1e\xb8\xe7\xbd\x38\xc6\xa6\xae\x4a\x5f\x74\x16\xda\x11\x2a\x14\xcf\xa1\xe8\x41\x70\xd2\x07\xeb\x03\x01\x92\x94\xca\x13\x47\x92\x09\x7d\x96\xf0\x36\x54\x57\xdb\x74\x01\xce\xfa\xda\x8c\x67\x92\xd2\xfc\x6f\xf7\x0f\x99\x29\x48\x2d\xc4\x76\x81\x16\xae\xf0\x5d\x3d\xb2\x93\xfb\x15\x4c\x19\x7b\x90\x43\x7c\xe8\xb3\x48\x82\xf1\x23\xd5\x42\x21\x32\xc6\x98\x68\x4f\x9e\x1c\x4a\xdf\xf6\xee\x17\x25\xa6\xbb\xb0\xf6\xd6\xac\x58\x66\xa6\xf2\x89\xd4\xdc\xe4\x8d\x14\xcb\xb3\xcb\xd2\x6a\xdd\xeb\xbf\xdf\xf2\x1e\x00\x00\xff\xff\x99\x0a\x1a\xba\xf3\x02\x00\x00")
+
+func dbTenant3_tenant_user_apiSqlBytes() ([]byte, error) {
+	return bindataRead(
+		_dbTenant3_tenant_user_apiSql,
+		"db/tenant/3_tenant_user_api.sql",
+	)
+}
+
+func dbTenant3_tenant_user_apiSql() (*asset, error) {
+	bytes, err := dbTenant3_tenant_user_apiSqlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "db/tenant/3_tenant_user_api.sql", size: 755, mode: os.FileMode(436), modTime: time.Unix(1501142783, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -161,8 +182,9 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"db/tenant/1_base.sql": dbTenant1_baseSql,
-	"db/tenant/2_auth.sql": dbTenant2_authSql,
+	"db/tenant/1_base.sql":            dbTenant1_baseSql,
+	"db/tenant/2_auth.sql":            dbTenant2_authSql,
+	"db/tenant/3_tenant_user_api.sql": dbTenant3_tenant_user_apiSql,
 }
 
 // AssetDir returns the file names below a certain
@@ -208,8 +230,9 @@ type bintree struct {
 var _bintree = &bintree{nil, map[string]*bintree{
 	"db": &bintree{nil, map[string]*bintree{
 		"tenant": &bintree{nil, map[string]*bintree{
-			"1_base.sql": &bintree{dbTenant1_baseSql, map[string]*bintree{}},
-			"2_auth.sql": &bintree{dbTenant2_authSql, map[string]*bintree{}},
+			"1_base.sql":            &bintree{dbTenant1_baseSql, map[string]*bintree{}},
+			"2_auth.sql":            &bintree{dbTenant2_authSql, map[string]*bintree{}},
+			"3_tenant_user_api.sql": &bintree{dbTenant3_tenant_user_apiSql, map[string]*bintree{}},
 		}},
 	}},
 }}

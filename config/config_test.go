@@ -64,11 +64,11 @@ func TestGetTenantByHost(t *testing.T) {
 func TestDynamicConfigRefresher(t *testing.T) {
 	TenantsLoader = tenantsLoaderFuncMock
 	tenantCache = nil
-	cacheRefresherDuration = 1 * time.Second
+	cacheRefresherDuration = 100 * time.Millisecond
 
 	dynamicConfigRefresher()
 
-	time.Sleep(1500 * time.Millisecond)
+	time.Sleep(200 * time.Millisecond)
 
 	if len(tenantCache) != 4 {
 		t.Error("Expected cache with 4 tenants")

@@ -28,9 +28,12 @@ func residentLinkFactory(halResource domain.HalResource, basePath string, detail
 	resident := halResource.(*tenant.Resident)
 	resident.AddLink(domain.REL_SELF, fmt.Sprintf("%s/%d", basePath, resident.ID))
 
-	if detailed && resident.ApartmentID != nil {
+	if detailed {
 		resident.AddLink(domain.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, resident.ID))
 		resident.AddLink(domain.REL_DELETE, fmt.Sprintf("%s/%d", basePath, resident.ID))
-		resident.AddLink(tenant.REL_APARTMENT, fmt.Sprintf("%s/%d", ApartmentBasePath, *resident.ApartmentID))
+
+		if resident.ApartmentID != nil {
+			resident.AddLink(tenant.REL_APARTMENT, fmt.Sprintf("%s/%d", ApartmentBasePath, *resident.ApartmentID))
+		}
 	}
 }

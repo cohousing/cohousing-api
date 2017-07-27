@@ -9,11 +9,15 @@ import (
 	"strings"
 )
 
+const (
+	REL_GROUPS domain.RelType = "groups"
+)
+
 type User struct {
 	domain.BaseModel
 	Username string  `json:"username"`
 	Password string  `gorm:"size:60" json:"-"`
-	Groups   []Group `gorm:"many2many:users_groups;" json:"groups"`
+	Groups   []Group `gorm:"many2many:users_groups;" json:"-"`
 	Permission
 	domain.DefaultHalResource
 }
@@ -55,23 +59,28 @@ func (u *User) BeforeCreate() (err error) {
 type Group struct {
 	domain.BaseModel
 	Name  string `json:"name"`
-	Users []User `gorm:"many2many:users_groups;" json:"users"`
+	Users []User `gorm:"many2many:users_groups;" json:"-"`
 	Permission
 	domain.DefaultHalResource
 }
 
 type Permission struct {
 	GlobalAdmin      bool   `json:"global_admin"`
-	Residents        string `gorm:"size:4;" json:"-"`
+	Residents        string `gorm:"size:4;column:perm_residents" json:"-"`
 	CreateResidents  bool   `gorm:"-" json:"create_residents"`
 	ReadResidents    bool   `gorm:"-" json:"read_residents"`
 	UpdateResidents  bool   `gorm:"-" json:"update_residents"`
 	DeleteResidents  bool   `gorm:"-" json:"delete_residents"`
-	Apartments       string `gorm:"size:4;" json:"-"`
+	Apartments       string `gorm:"size:4;column:perm_apartments" json:"-"`
 	CreateApartments bool   `gorm:"-" json:"create_apartments"`
 	ReadApartments   bool   `gorm:"-" json:"read_apartments"`
 	UpdateApartments bool   `gorm:"-" json:"update_apartments"`
 	DeleteApartments bool   `gorm:"-" json:"delete_apartments"`
+	Users            string `gorm:"size:4;column:perm_users" json:"-"`
+	CreateUsers      bool   `gorm:"-" json:"create_users"`
+	ReadUsers        bool   `gorm:"-" json:"read_users"`
+	UpdateUsers      bool   `gorm:"-" json:"update_users"`
+	DeleteUsers      bool   `gorm:"-" json:"delete_users"`
 }
 
 func (p *Permission) BeforeSave() (err error) {
