@@ -1,8 +1,8 @@
 package tenant
 
 import (
-	"github.com/cohousing/cohousing-api/api/utils"
-	"github.com/cohousing/cohousing-api/db"
+	"github.com/cohousing/cohousing-tenant-api/api/utils"
+	"github.com/cohousing/cohousing-tenant-api/db"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 )

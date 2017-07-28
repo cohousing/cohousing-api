@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"github.com/cohousing/cohousing-api/domain"
+	"github.com/cohousing/cohousing-tenant-api/domain"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )

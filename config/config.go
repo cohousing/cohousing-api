@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"github.com/cohousing/cohousing-api/domain/admin"
+	"github.com/cohousing/cohousing-tenant-api/domain/admin"
 	"github.com/jinzhu/configor"
 	"time"
 )

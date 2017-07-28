@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/cohousing/cohousing-api/domain/admin"
+	"github.com/cohousing/cohousing-tenant-api/domain/admin"
 	"testing"
 	"time"
 )

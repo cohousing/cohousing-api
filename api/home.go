@@ -2,12 +2,12 @@ package api
 
 import (
 	"fmt"
-	"github.com/cohousing/cohousing-api/api/admin"
-	"github.com/cohousing/cohousing-api/api/tenant"
-	"github.com/cohousing/cohousing-api/api/utils"
-	"github.com/cohousing/cohousing-api/domain"
-	adminDomain "github.com/cohousing/cohousing-api/domain/admin"
-	tenantDomain "github.com/cohousing/cohousing-api/domain/tenant"
+	"github.com/cohousing/cohousing-tenant-api/api/admin"
+	"github.com/cohousing/cohousing-tenant-api/api/tenant"
+	"github.com/cohousing/cohousing-tenant-api/api/utils"
+	"github.com/cohousing/cohousing-tenant-api/domain"
+	adminDomain "github.com/cohousing/cohousing-tenant-api/domain/admin"
+	tenantDomain "github.com/cohousing/cohousing-tenant-api/domain/tenant"
 	"github.com/cohousing/location"
 	"github.com/gin-gonic/gin"
 	"net/http"

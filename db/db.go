@@ -2,8 +2,8 @@ package db
 
 import (
 	"fmt"
-	"github.com/cohousing/cohousing-api/config"
-	"github.com/cohousing/cohousing-api/domain/admin"
+	"github.com/cohousing/cohousing-tenant-api/config"
+	"github.com/cohousing/cohousing-tenant-api/domain/admin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )

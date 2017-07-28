@@ -3,7 +3,7 @@ package tenant
 import (
 	"errors"
 	"fmt"
-	"github.com/cohousing/cohousing-api/domain"
+	"github.com/cohousing/cohousing-tenant-api/domain"
 	"golang.org/x/crypto/bcrypt"
 	"reflect"
 	"strings"

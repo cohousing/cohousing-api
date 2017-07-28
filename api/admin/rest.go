@@ -1,7 +1,7 @@
 package admin
 
 import (
-	"github.com/cohousing/cohousing-api/api/utils"
+	"github.com/cohousing/cohousing-tenant-api/api/utils"
 	"github.com/gin-gonic/gin"
 )
 

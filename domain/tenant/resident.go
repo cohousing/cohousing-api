@@ -1,6 +1,6 @@
 package tenant
 
-import "github.com/cohousing/cohousing-api/domain"
+import "github.com/cohousing/cohousing-tenant-api/domain"
 
 const (
 	REL_APARTMENT  domain.RelType = "apartment"

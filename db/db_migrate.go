@@ -3,8 +3,8 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"github.com/cohousing/cohousing-api/db/conf"
-	"github.com/cohousing/cohousing-api/db/tenant"
+	"github.com/cohousing/cohousing-tenant-api/db/conf"
+	"github.com/cohousing/cohousing-tenant-api/db/tenant"
 	"github.com/rubenv/sql-migrate"
 	"os"
 )

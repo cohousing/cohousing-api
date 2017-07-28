@@ -1,9 +1,9 @@
 package api
 
 import (
-	"github.com/cohousing/cohousing-api/api/admin"
-	"github.com/cohousing/cohousing-api/api/tenant"
-	"github.com/cohousing/cohousing-api/api/utils"
+	"github.com/cohousing/cohousing-tenant-api/api/admin"
+	"github.com/cohousing/cohousing-tenant-api/api/tenant"
+	"github.com/cohousing/cohousing-tenant-api/api/utils"
 	"github.com/cohousing/location"
 	"github.com/gin-gonic/gin"
 )

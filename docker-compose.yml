@@ -2,7 +2,7 @@ version: '3'
 
 services:
   api:
-    image: cohousing/cohousing-api:latest
+    image: cohousing/cohousing-tenant-api:latest
     networks:
       - web
       - db
@@ -10,8 +10,8 @@ services:
       - /data/cohousing/config.yml:/config.yml:ro
     labels:
       - "traefik.enable=true"
-      - "traefik.backend=cohousing-api"
-      - "traefik.frontend.rule=Host: cohousing.nu, www.cohousing.nu, jystrupsavvaerk.cohousing.nu"
+      - "traefik.backend=cohousing-tenant-api"
+      - "traefik.frontend.rule=Host: jystrupsavvaerk.cohousing.nu"
       - "traefik.docker.network=cohousing_net_web"
       - "traefik.backend.loadbalancer.method=drr"
     deploy:

@@ -3,9 +3,9 @@ package tenant
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/cohousing/cohousing-api/api/utils"
-	"github.com/cohousing/cohousing-api/db"
-	"github.com/cohousing/cohousing-api/domain/tenant"
+	"github.com/cohousing/cohousing-tenant-api/api/utils"
+	"github.com/cohousing/cohousing-tenant-api/db"
+	"github.com/cohousing/cohousing-tenant-api/domain/tenant"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"

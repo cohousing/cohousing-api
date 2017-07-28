@@ -4,9 +4,10 @@ dist: trusty
 language: go
 
 go:
+  - 1.7
   - 1.8
 
-go_import_path: github.com/cohousing/cohousing-api
+go_import_path: github.com/cohousing/cohousing-tenant-api
 
 before_install:
   - go get -u github.com/kardianos/govendor
@@ -20,14 +21,14 @@ before_script:
 
 script:
   - ./create_dbmigrate_bindata.sh
-  - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cohousing-api .
+  - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o cohousing-tenant-api .
   - govendor test -coverprofile=coverage.txt -covermode=atomic
-  - docker build -t cohousing-api .
+  - docker build -t cohousing-tenant-api .
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-  - docker tag cohousing-api cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
-  - docker push cohousing/cohousing-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
+  - docker tag cohousing-tenant-api cohousing/cohousing-tenant-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
+  - docker push cohousing/cohousing-tenant-api:${TRAVIS_COMMIT:0:8}-$TRAVIS_BUILD_NUMBER
 
 addons:
   ssh_known_hosts: $DEPLOY_SERVER

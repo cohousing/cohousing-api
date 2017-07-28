@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/cohousing/cohousing-api/api"
-	"github.com/cohousing/cohousing-api/config"
-	"github.com/cohousing/cohousing-api/db"
+	"github.com/cohousing/cohousing-tenant-api/api"
+	"github.com/cohousing/cohousing-tenant-api/config"
+	"github.com/cohousing/cohousing-tenant-api/db"
 )
 
 func main() {

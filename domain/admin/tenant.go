@@ -1,7 +1,7 @@
 package admin
 
 import (
-	"github.com/cohousing/cohousing-api/domain"
+	"github.com/cohousing/cohousing-tenant-api/domain"
 )
 
 const (

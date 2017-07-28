@@ -2,10 +2,10 @@ package admin
 
 import (
 	"fmt"
-	"github.com/cohousing/cohousing-api/api/utils"
-	"github.com/cohousing/cohousing-api/db"
-	"github.com/cohousing/cohousing-api/domain"
-	"github.com/cohousing/cohousing-api/domain/admin"
+	"github.com/cohousing/cohousing-tenant-api/api/utils"
+	"github.com/cohousing/cohousing-tenant-api/db"
+	"github.com/cohousing/cohousing-tenant-api/domain"
+	"github.com/cohousing/cohousing-tenant-api/domain/admin"
 	"github.com/gin-gonic/gin"
 )
 
