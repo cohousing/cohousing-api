@@ -52,14 +52,8 @@ func getResourceList(config BasicEndpointConfig, basePath string, repository *db
 	return func(c *gin.Context) {
 		lookupObject, page := parseQuery(c, config.domainType)
 		list, count := repository.GetList(c, lookupObject, GetStartRecord(page, RecordsPerPage), RecordsPerPage)
-		valueList := reflect.ValueOf(list).Elem()
-		listLength := valueList.Len()
-		domainList := CreateObjectList(basePath, make([]interface{}, listLength), page, count, RecordsPerPage)
-		for i := 0; i < listLength; i++ {
-			object := valueList.Index(i).Addr().Interface()
-			domainList.Objects[i] = object
-			AddLinks(c, object, basePath, false)
-		}
+		AddLinks(c, list, basePath, false)
+		domainList := CreatePaginatedList(basePath, list, page, count, RecordsPerPage)
 
 		c.JSON(http.StatusOK, domainList)
 	}

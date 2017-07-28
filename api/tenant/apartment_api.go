@@ -21,7 +21,7 @@ func CreateApartmentRoutes(router *gin.RouterGroup, dbFactory db.DBFactory) {
 		RouterHandlers: []gin.HandlerFunc{utils.MustBeTenant(), MustAuthenticate()},
 	})
 	ApartmentBasePath = endpoint.BasePath()
-	utils.AddLinkFactory(tenant.Apartment{}, apartmentLinkFactory)
+	utils.AddLinkFactory(&tenant.Apartment{}, apartmentLinkFactory)
 }
 
 func apartmentLinkFactory(c *gin.Context, halResource domain.HalResource, basePath string, detailed bool) {
@@ -30,13 +30,13 @@ func apartmentLinkFactory(c *gin.Context, halResource domain.HalResource, basePa
 
 	if detailed {
 		permission := ResolvePermission(c)
-		if permission.UpdateApartments {
+		if permission.GlobalAdmin || permission.UpdateApartments {
 			halResource.AddLink(domain.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, apartment.ID))
 		}
-		if permission.DeleteApartments {
+		if permission.GlobalAdmin || permission.DeleteApartments {
 			halResource.AddLink(domain.REL_DELETE, fmt.Sprintf("%s/%d", basePath, apartment.ID))
 		}
-		if permission.ReadResidents {
+		if permission.GlobalAdmin || permission.ReadResidents {
 			halResource.AddLink(tenant.REL_RESIDENTS, fmt.Sprintf("%s?apartment_id=%d", ResidentBasePath, apartment.ID))
 		}
 	}

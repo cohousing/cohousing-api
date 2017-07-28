@@ -7,30 +7,39 @@ import (
 )
 
 var (
-	factory map[string]LinkFactory = make(map[string]LinkFactory)
+	factory              map[string]LinkFactory = make(map[string]LinkFactory)
+	halResourceInterface domain.HalResource
 )
 
 type LinkFactory func(c *gin.Context, halResource domain.HalResource, basePath string, detailed bool)
 
-func AddLinkFactory(resourceType interface{}, linkFactory LinkFactory) {
-	factory[reflect.TypeOf(resourceType).Name()] = linkFactory
+func AddLinkFactory(resource interface{}, linkFactory LinkFactory) {
+	resourceType := reflect.TypeOf(resource)
+	if resourceType.Implements(reflect.TypeOf(&halResourceInterface).Elem()) {
+		factory[resourceType.String()] = linkFactory
+	} else {
+		panic("Must add a resource that implements HalResource. Also remember to parse it as a pointer.")
+	}
 }
 
 // Add links to resource based on the type of it
 func AddLinks(c *gin.Context, resource interface{}, basePath string, detailed bool) {
-	resourceType := reflect.TypeOf(resource).Elem()
-
 	addLinks := func(halResource domain.HalResource) {
-		linkFactory := factory[resourceType.Name()]
+		linkFactory := factory[reflect.TypeOf(halResource).String()]
 		linkFactory(c, halResource, basePath, detailed)
 	}
 
-	if resourceType.Kind() == reflect.Array {
-		resourceList := resource.([]interface{})
-		for i := 0; i < len(resourceList); i++ {
-			addLinks(resourceList[i].(domain.HalResource))
-		}
-	} else {
+	resourceType := reflect.TypeOf(resource)
+	if resourceType.Implements(reflect.TypeOf(&halResourceInterface).Elem()) {
 		addLinks(resource.(domain.HalResource))
+	} else if resourceType.Kind() == reflect.Ptr {
+		AddLinks(c, reflect.ValueOf(resource).Elem().Interface(), basePath, detailed)
+	} else if resourceType.Kind() == reflect.Slice {
+		valueList := reflect.ValueOf(resource)
+		listLength := valueList.Len()
+		for i := 0; i < listLength; i++ {
+			object := valueList.Index(i).Addr().Interface()
+			addLinks(object.(domain.HalResource))
+		}
 	}
 }

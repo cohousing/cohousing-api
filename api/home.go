@@ -44,6 +44,7 @@ func renderTenantHome(c *gin.Context, basePath string) {
 	tenantHome.AddLink(tenantDomain.REL_APARTMENTS, tenant.ApartmentBasePath)
 	tenantHome.AddLink(tenantDomain.REL_RESIDENTS, tenant.ResidentBasePath)
 	tenantHome.AddLink(tenantDomain.REL_USERS, tenant.UserBasePath)
+	tenantHome.AddLink(tenantDomain.REL_GROUPS, tenant.GroupBasePath)
 
 	c.JSON(http.StatusOK, tenantHome)
 }

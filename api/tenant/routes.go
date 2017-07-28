@@ -11,6 +11,7 @@ func CreateTenantRoutes(router *gin.RouterGroup) {
 	CreateApartmentRoutes(router, dbFactory)
 	CreateResidentRoutes(router, dbFactory)
 	CreateUserRoutes(router, dbFactory)
+	CreateGroupRoutes(router, dbFactory)
 
 	CreateFixtureRoutes(router)
 }

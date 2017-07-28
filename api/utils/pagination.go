@@ -7,15 +7,15 @@ import (
 	"strconv"
 )
 
-type ObjectList struct {
+type PaginatedList struct {
 	CurrentPage int
 	Count       int
-	Objects     []interface{} `json:"objects"`
+	Objects     interface{} `json:"objects"`
 	domain.DefaultHalResource
 }
 
-func CreateObjectList(baseUrl string, objects []interface{}, currentPage, count, recordsPerPage int) ObjectList {
-	objectList := ObjectList{
+func CreatePaginatedList(baseUrl string, objects interface{}, currentPage, count, recordsPerPage int) PaginatedList {
+	objectList := PaginatedList{
 		CurrentPage: currentPage,
 		Count:       count,
 		Objects:     objects,
@@ -37,7 +37,7 @@ func GetCurrentPage(c *gin.Context) int {
 	return page
 }
 
-func AddPaginationLinks(objectList *ObjectList, baseUrl string, recordsPerPage int) {
+func AddPaginationLinks(objectList *PaginatedList, baseUrl string, recordsPerPage int) {
 	var firstPage int = 1
 
 	var lastPage int = objectList.Count / recordsPerPage

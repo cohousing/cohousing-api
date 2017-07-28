@@ -82,6 +82,11 @@ type Permission struct {
 	ReadUsers        bool   `gorm:"-" json:"read_users"`
 	UpdateUsers      bool   `gorm:"-" json:"update_users"`
 	DeleteUsers      bool   `gorm:"-" json:"delete_users"`
+	Groups           string `gorm:"size:4;column:perm_groups" json:"-"`
+	CreateGroups     bool   `gorm:"-" json:"create_groups"`
+	ReadGroups       bool   `gorm:"-" json:"read_groups"`
+	UpdateGroups     bool   `gorm:"-" json:"update_groups"`
+	DeleteGroups     bool   `gorm:"-" json:"delete_groups"`
 }
 
 func (p *Permission) BeforeSave() (err error) {

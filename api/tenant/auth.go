@@ -52,8 +52,6 @@ func MustAuthenticate() gin.HandlerFunc {
 			db.GetTenantDB(utils.GetTenantFromContext(c)).Where("`username` = ?", username).First(&user)
 			db.GetTenantDB(utils.GetTenantFromContext(c)).Model(&user).Related(&user.Groups, "Groups")
 
-			fmt.Fprintf(os.Stdout, "User returned for request %s: %v\n", authorization, user)
-
 			err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Password not correct for request %s: %v\n", authorization, err)

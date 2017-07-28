@@ -24,7 +24,7 @@ func CreateUserRoutes(router *gin.RouterGroup, dbFactory db.DBFactory) {
 	})
 	UserBasePath = endpoint.BasePath()
 
-	utils.AddLinkFactory(tenant.User{}, userLinkFactory)
+	utils.AddLinkFactory(&tenant.User{}, userLinkFactory)
 
 	endpoint.GET("/:id/groups", AuthorizeDomainObject(tenant.User{}, PERM_READ), getGroupsForUser(dbFactory))
 }
@@ -35,13 +35,15 @@ func userLinkFactory(c *gin.Context, halResource domain.HalResource, basePath st
 
 	if detailed {
 		permission := ResolvePermission(c)
-		if permission.UpdateUsers {
+		if permission.GlobalAdmin || permission.UpdateUsers {
 			u.AddLink(domain.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, u.ID))
 		}
-		if permission.DeleteUsers {
+		if permission.GlobalAdmin || permission.DeleteUsers {
 			u.AddLink(domain.REL_DELETE, fmt.Sprintf("%s/%d", basePath, u.ID))
 		}
-		u.AddLink(tenant.REL_GROUPS, fmt.Sprintf("%s/%d/groups", basePath, u.ID))
+		if permission.GlobalAdmin || permission.ReadGroups {
+			u.AddLink(tenant.REL_GROUPS, fmt.Sprintf("%s/%d/groups", basePath, u.ID))
+		}
 	}
 }
 
@@ -51,9 +53,8 @@ func getGroupsForUser(dbFactory db.DBFactory) gin.HandlerFunc {
 			u := tenant.User{}
 			u.ID = id
 			var groups []tenant.Group
-			var count int
-			dbFactory(c).Model(&u).Related(&groups, "Groups").Count(&count)
-
+			dbFactory(c).Model(&u).Related(&groups, "Groups")
+			utils.AddLinks(c, groups, GroupBasePath, false)
 			c.JSON(http.StatusOK, groups)
 		}
 	}

@@ -21,7 +21,7 @@ func CreateTenantAdminRoutes(router *gin.RouterGroup, dbFactory db.DBFactory) {
 		RouterHandlers: []gin.HandlerFunc{utils.MustBeAdminDomain()},
 	})
 	TenantAdminBasePath = endpoint.BasePath()
-	utils.AddLinkFactory(admin.Tenant{}, tenantAdminLinkFactory)
+	utils.AddLinkFactory(&admin.Tenant{}, tenantAdminLinkFactory)
 }
 
 func tenantAdminLinkFactory(c *gin.Context, halResource domain.HalResource, basePath string, detailed bool) {
