@@ -3,11 +3,9 @@ package api
 import (
 	"fmt"
 	"github.com/cohousing/cohousing-tenant-api/config"
-	"github.com/cohousing/location"
 	"github.com/gin-gonic/gin"
 	"net"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -72,28 +70,5 @@ func MustBeTenant() gin.HandlerFunc {
 				"error": fmt.Sprintf("No tenant found on URL: %s", c.Request.Host),
 			})
 		}
-	}
-}
-
-func MustBeAdminDomain() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		headers := c.Request.Header
-		for header := range headers {
-			fmt.Fprintf(os.Stdout, "HEADER %s => %s\n", header, headers.Get(header))
-		}
-
-		url := location.Get(c)
-		fmt.Fprintf(os.Stdout, "URL: %v\n", url)
-		host, err := trimHost(url.Host)
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-		} else {
-			if host != config.GetConfig().AdminDomain {
-				c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-					"error": fmt.Sprintf("Endpoint requested (%s) not found on domain: %s", c.Request.RequestURI, url.Host),
-				})
-			}
-		}
-
 	}
 }

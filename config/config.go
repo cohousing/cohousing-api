@@ -27,9 +27,7 @@ var (
 type Config struct {
 	TenantDomain string
 
-	AdminDomain string
-
-	ConfigDB struct {
+	DB struct {
 		User     string
 		Password string
 		Host     string

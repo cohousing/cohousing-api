@@ -3,12 +3,7 @@
 # 127.0.0.1 localhost beetlehouse.cohousing.nu
 tenantdomain: "%s.cohousing.nu"
 
-# For local development change /etc/hosts adding localdev.cohousing.nu to 127.0.0.1 to make it work
-# i.e.
-# 127.0.0.1 localhost localdev.cohousing.nu
-admindomain: localdev.cohousing.nu
-
-configdb:
+db:
   user: root
   password:
   host: 127.0.0.1
