@@ -1,9 +1,9 @@
-package tenant
+package domain
 
 import (
 	"errors"
 	"fmt"
-	"github.com/cohousing/cohousing-tenant-api/domain"
+	"github.com/cohousing/cohousing-api-utils/domain"
 	"golang.org/x/crypto/bcrypt"
 	"reflect"
 	"strings"

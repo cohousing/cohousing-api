@@ -1,17 +1,16 @@
-package tenant
+package api
 
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/cohousing/cohousing-tenant-api/api/utils"
-	"github.com/cohousing/cohousing-tenant-api/db"
-	"github.com/cohousing/cohousing-tenant-api/domain/tenant"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"os"
 	"reflect"
 	"strings"
+	"github.com/cohousing/cohousing-tenant-api/domain"
+	"github.com/cohousing/cohousing-tenant-api/db"
 )
 
 type AuthOperation string
@@ -48,9 +47,9 @@ func MustAuthenticate() gin.HandlerFunc {
 			username := userPassArray[0]
 			password := userPassArray[1]
 
-			var user tenant.User
-			db.GetTenantDB(utils.GetTenantFromContext(c)).Where("`username` = ?", username).First(&user)
-			db.GetTenantDB(utils.GetTenantFromContext(c)).Model(&user).Related(&user.Groups, "Groups")
+			var user domain.User
+			db.GetTenantDB(GetTenantFromContext(c)).Where("`username` = ?", username).First(&user)
+			db.GetTenantDB(GetTenantFromContext(c)).Model(&user).Related(&user.Groups, "Groups")
 
 			err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 			if err != nil {
@@ -101,11 +100,11 @@ func MustBeGlobalAdmin() gin.HandlerFunc {
 	}
 }
 
-func GetUserFromContext(c *gin.Context) *tenant.User {
-	return c.MustGet(GIN_USER).(*tenant.User)
+func GetUserFromContext(c *gin.Context) *domain.User {
+	return c.MustGet(GIN_USER).(*domain.User)
 }
 
-func ResolvePermission(c *gin.Context) tenant.Permission {
+func ResolvePermission(c *gin.Context) domain.Permission {
 	return GetUserFromContext(c).ResolvePermissions()
 }
 

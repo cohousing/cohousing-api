@@ -1,19 +1,18 @@
-package tenant
+package api
 
 import (
 	"fmt"
-	"github.com/cohousing/cohousing-tenant-api/api/utils"
 	"github.com/cohousing/cohousing-tenant-api/db"
-	"github.com/cohousing/cohousing-tenant-api/domain/tenant"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"math/rand"
+	"github.com/cohousing/cohousing-tenant-api/domain"
 )
 
 func CreateFixtureRoutes(router *gin.RouterGroup) {
 
-	router.GET("fixtures", utils.MustBeTenant(), MustAuthenticate(), MustBeGlobalAdmin(), func(c *gin.Context) {
-		tenantDB := db.GetTenantDB(utils.GetTenantFromContext(c))
+	router.GET("fixtures", MustBeTenant(), MustAuthenticate(), MustBeGlobalAdmin(), func(c *gin.Context) {
+		tenantDB := db.GetTenantDB(GetTenantFromContext(c))
 
 		tenantDB.Exec("DELETE FROM residents")
 		tenantDB.Exec("DELETE FROM apartments")
@@ -29,7 +28,7 @@ func CreateFixtureRoutes(router *gin.RouterGroup) {
 }
 func createUsersAndGroups(tenantDB *gorm.DB) {
 	// Create Admin User
-	admin := tenant.User{
+	admin := domain.User{
 		Username: "admin",
 		Password: "admin",
 	}
@@ -37,7 +36,7 @@ func createUsersAndGroups(tenantDB *gorm.DB) {
 
 	tenantDB.Create(&admin)
 	// Create Admin Group
-	adminGroup := tenant.Group{
+	adminGroup := domain.Group{
 		Name: "Admins",
 	}
 	adminGroup.CreateResidents = true
@@ -55,7 +54,7 @@ func createUsersAndGroups(tenantDB *gorm.DB) {
 	tenantDB.Create(&adminGroup)
 
 	// Create "Moderator User" Group
-	moderatorGroup := tenant.Group{
+	moderatorGroup := domain.Group{
 		Name: "Moderators",
 	}
 	moderatorGroup.CreateResidents = true
@@ -67,7 +66,7 @@ func createUsersAndGroups(tenantDB *gorm.DB) {
 	tenantDB.Create(&moderatorGroup)
 
 	// Create "Normal User" Group
-	userGroup := tenant.Group{
+	userGroup := domain.Group{
 		Name: "Users",
 	}
 	userGroup.ReadResidents = true
@@ -75,60 +74,60 @@ func createUsersAndGroups(tenantDB *gorm.DB) {
 	tenantDB.Create(&userGroup)
 
 	// Create a Guest Group
-	guestGroup := tenant.Group{
+	guestGroup := domain.Group{
 		Name: "Guests",
 	}
 	tenantDB.Create(&guestGroup)
 
 	// Create 5 users with admin rights
 	for i := 1; i <= 5; i++ {
-		u := tenant.User{
+		u := domain.User{
 			Username: fmt.Sprintf("admin_user%d", i),
 			Password: fmt.Sprintf("admin_user%d", i),
-			Groups:   []tenant.Group{adminGroup, moderatorGroup, userGroup},
+			Groups:   []domain.Group{adminGroup, moderatorGroup, userGroup},
 		}
 		tenantDB.Create(&u)
 	}
 
 	// Create 20 users with moderator rights
 	for i := 1; i <= 50; i++ {
-		u := tenant.User{
+		u := domain.User{
 			Username: fmt.Sprintf("moderator%d", i),
 			Password: fmt.Sprintf("moderator%d", i),
-			Groups:   []tenant.Group{moderatorGroup, userGroup},
+			Groups:   []domain.Group{moderatorGroup, userGroup},
 		}
 		tenantDB.Create(&u)
 	}
 
 	// Create 50 users with only user rights
 	for i := 1; i <= 50; i++ {
-		u := tenant.User{
+		u := domain.User{
 			Username: fmt.Sprintf("user%d", i),
 			Password: fmt.Sprintf("user%d", i),
-			Groups:   []tenant.Group{userGroup},
+			Groups:   []domain.Group{userGroup},
 		}
 		tenantDB.Create(&u)
 	}
 
 	// Create 10 guest users with only guest rights
 	for i := 1; i <= 10; i++ {
-		u := tenant.User{
+		u := domain.User{
 			Username: fmt.Sprintf("guest%d", i),
 			Password: fmt.Sprintf("guest%d", i),
-			Groups:   []tenant.Group{guestGroup},
+			Groups:   []domain.Group{guestGroup},
 		}
 		tenantDB.Create(&u)
 	}
 }
 func createApartmentAndResidents(tenantDB *gorm.DB) {
 	for i := 1; i <= 100; i++ {
-		a := tenant.Apartment{
+		a := domain.Apartment{
 			Address: fmt.Sprintf("Apartment %d", i),
 		}
 		tenantDB.Create(&a)
 
 		for j := 1; j <= rand.Intn(4)+1; j++ {
-			r := tenant.Resident{
+			r := domain.Resident{
 				Name:         fmt.Sprintf("Resident %d.%d", i, j),
 				PhoneNumber:  fmt.Sprintf("12345%d", i+j),
 				EmailAddress: fmt.Sprintf("resident%d.%d@example.com", i, j),

@@ -1,9 +1,8 @@
-package utils
+package api
 
 import (
 	"fmt"
 	"github.com/cohousing/cohousing-tenant-api/config"
-	"github.com/cohousing/cohousing-tenant-api/domain/admin"
 	"github.com/cohousing/location"
 	"github.com/gin-gonic/gin"
 	"net"
@@ -54,8 +53,8 @@ func trimHost(host string) (string, error) {
 	}
 }
 
-func GetTenantFromContext(c *gin.Context) *admin.Tenant {
-	return c.MustGet(GIN_TENANT).(*admin.Tenant)
+func GetTenantFromContext(c *gin.Context) *config.Tenant {
+	return c.MustGet(GIN_TENANT).(*config.Tenant)
 }
 
 func IsTenantRequest(c *gin.Context) bool {

@@ -9,6 +9,30 @@
 			"revisionTime": "2017-06-26T11:06:00Z"
 		},
 		{
+			"checksumSHA1": "srwmLiFgE6UGyBUBlrwHZiCAOmk=",
+			"path": "github.com/cohousing/cohousing-api-utils",
+			"revision": "589fae869379bd0b5942362438259de40e635ef5",
+			"revisionTime": "2017-07-29T19:02:46Z"
+		},
+		{
+			"checksumSHA1": "gDPNR0CtVTdtrTcRafpIR/I5lhs=",
+			"path": "github.com/cohousing/cohousing-api-utils/api",
+			"revision": "589fae869379bd0b5942362438259de40e635ef5",
+			"revisionTime": "2017-07-29T19:02:46Z"
+		},
+		{
+			"checksumSHA1": "Qi1MW2CjNNgn9DoxANvK6zl29lQ=",
+			"path": "github.com/cohousing/cohousing-api-utils/db",
+			"revision": "589fae869379bd0b5942362438259de40e635ef5",
+			"revisionTime": "2017-07-29T19:02:46Z"
+		},
+		{
+			"checksumSHA1": "xTX5imLiKK9p8DTsxvPRO22O06g=",
+			"path": "github.com/cohousing/cohousing-api-utils/domain",
+			"revision": "589fae869379bd0b5942362438259de40e635ef5",
+			"revisionTime": "2017-07-29T19:02:46Z"
+		},
+		{
 			"checksumSHA1": "A1pkZRdcYbIj3NSg7KMB5zZZ2pE=",
 			"path": "github.com/cohousing/location",
 			"revision": "03bc4ad20437a145024eaac6d47b82ef0979e738",

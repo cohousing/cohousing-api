@@ -3,21 +3,19 @@ package db
 import (
 	"fmt"
 	"github.com/cohousing/cohousing-tenant-api/config"
-	"github.com/cohousing/cohousing-tenant-api/domain/admin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 var (
 	dbCache map[string]*gorm.DB = make(map[string]*gorm.DB)
-	confDB  *gorm.DB
 )
 
 func InitDB() {
 	config.TenantsLoader = loadTenantsFromDB
 }
 
-func GetTenantDB(tenant *admin.Tenant) *gorm.DB {
+func GetTenantDB(tenant *config.Tenant) *gorm.DB {
 	db := dbCache[tenant.Context]
 	if db == nil {
 		cfg := config.GetConfig()
@@ -36,26 +34,10 @@ func GetTenantDB(tenant *admin.Tenant) *gorm.DB {
 	return db
 }
 
-func GetConfDB() *gorm.DB {
-	if confDB == nil {
-		var err error
-		cfg := config.GetConfig()
-		connectionString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", cfg.ConfigDB.User, cfg.ConfigDB.Password, cfg.ConfigDB.Host, cfg.ConfigDB.Port, cfg.ConfigDB.Name)
-		confDB, err = gorm.Open("mysql", connectionString)
-		if err != nil {
-			panic(err)
-		}
-		if err = MigrateConfDB(confDB.DB()); err != nil {
-			panic(err)
-		}
-	}
-	return confDB
-}
+func loadTenantsFromDB() []config.Tenant {
+	var tenants []config.Tenant
 
-func loadTenantsFromDB() []admin.Tenant {
-	var tenants []admin.Tenant
-
-	GetConfDB().Find(&tenants)
+	// TODO How to get tenants now?
 
 	return tenants
 }

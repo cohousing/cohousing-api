@@ -2,13 +2,19 @@ package config
 
 import (
 	"fmt"
-	"github.com/cohousing/cohousing-tenant-api/domain/admin"
 	"github.com/jinzhu/configor"
 	"time"
 )
 
+type Tenant struct {
+	Context   string
+	Name      string
+	TenantUrl string
+	CustomUrl string
+}
+
 var (
-	tenantCache            map[string]*admin.Tenant
+	tenantCache            map[string]*Tenant
 	cacheRefresherDuration time.Duration = 1 * time.Minute
 	tenantRefresherQuitter chan struct{}
 	configFilePath         string = "config.yml"
@@ -36,7 +42,7 @@ func GetConfig() *Config {
 	return &loaded
 }
 
-type TenantsLoaderFunc func() []admin.Tenant
+type TenantsLoaderFunc func() []Tenant
 
 func Configure() {
 	LoadStaticConfiguration()
@@ -44,7 +50,7 @@ func Configure() {
 	dynamicConfigRefresher()
 }
 
-func GetTenantByHost(host string) *admin.Tenant {
+func GetTenantByHost(host string) *Tenant {
 	if tenantCache == nil {
 		refreshTenantCache()
 	}
@@ -74,7 +80,7 @@ func dynamicConfigRefresher() {
 func refreshTenantCache() {
 	tenants := TenantsLoader()
 
-	newTenantCache := make(map[string]*admin.Tenant)
+	newTenantCache := make(map[string]*Tenant)
 	for _, tenant := range tenants {
 		tenantUrl := buildTenantDomain(tenant.Context)
 		(&tenant).TenantUrl = tenantUrl
