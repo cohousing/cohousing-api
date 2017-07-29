@@ -3,14 +3,14 @@ package api
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/cohousing/cohousing-tenant-api/db"
+	"github.com/cohousing/cohousing-tenant-api/domain"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"os"
 	"reflect"
 	"strings"
-	"github.com/cohousing/cohousing-tenant-api/domain"
-	"github.com/cohousing/cohousing-tenant-api/db"
 )
 
 type AuthOperation string

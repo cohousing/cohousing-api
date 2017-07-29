@@ -3,10 +3,10 @@ package api
 import (
 	"fmt"
 	"github.com/cohousing/cohousing-tenant-api/db"
+	"github.com/cohousing/cohousing-tenant-api/domain"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"math/rand"
-	"github.com/cohousing/cohousing-tenant-api/domain"
 )
 
 func CreateFixtureRoutes(router *gin.RouterGroup) {

@@ -1,10 +1,10 @@
 package api
 
 import (
+	"github.com/cohousing/cohousing-tenant-api/db"
 	"github.com/cohousing/location"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"github.com/cohousing/cohousing-tenant-api/db"
 )
 
 func CreateRouter() {

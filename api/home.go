@@ -2,11 +2,11 @@ package api
 
 import (
 	"fmt"
+	domain2 "github.com/cohousing/cohousing-api-utils/domain"
+	"github.com/cohousing/cohousing-tenant-api/domain"
 	"github.com/cohousing/location"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	domain2 "github.com/cohousing/cohousing-api-utils/domain"
-	"github.com/cohousing/cohousing-tenant-api/domain"
 )
 
 type TenantHome struct {

@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/cohousing/cohousing-api-utils/api"
+	"github.com/gin-gonic/gin"
 )
 
 func ConfigureBasicTenantEndpoint(router *gin.RouterGroup, config utils.BasicEndpointConfig) *gin.RouterGroup {

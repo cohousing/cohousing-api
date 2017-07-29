@@ -2,11 +2,11 @@ package api
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/cohousing/cohousing-api-utils/api"
 	"github.com/cohousing/cohousing-api-utils/db"
-	"github.com/cohousing/cohousing-tenant-api/domain"
 	domain2 "github.com/cohousing/cohousing-api-utils/domain"
+	"github.com/cohousing/cohousing-tenant-api/domain"
+	"github.com/gin-gonic/gin"
 )
 
 var (
