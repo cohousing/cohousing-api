@@ -16,24 +16,26 @@ import (
 type AuthOperation string
 
 const (
-	GIN_USER                  = "gin_user"
-	PERM_CREATE AuthOperation = "Create"
-	PERM_READ   AuthOperation = "Read"
-	PERM_UPDATE AuthOperation = "Update"
-	PERM_DELETE AuthOperation = "Delete"
+	GIN_USER                        = "gin_user"
+	GIN_AUTHENTICATED               = "gin_authenticated"
+	PERM_CREATE       AuthOperation = "Create"
+	PERM_READ         AuthOperation = "Read"
+	PERM_UPDATE       AuthOperation = "Update"
+	PERM_DELETE       AuthOperation = "Delete"
 )
 
-func MustAuthenticate() gin.HandlerFunc {
+func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authorizationHeader := c.GetHeader("Authorization")
 		if len(authorizationHeader) == 0 {
-			abortWithUnauthenticated(c)
+			c.Set(GIN_AUTHENTICATED, false)
 		} else if strings.HasPrefix(authorizationHeader, "Basic ") {
 			authorizationValue := authorizationHeader[6:]
 			authorization, err := base64.StdEncoding.DecodeString(authorizationValue)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Couldn't decode base64: %v\n", err)
 				abortWithUnauthenticated(c)
+				c.Set(GIN_AUTHENTICATED, false)
 				return
 			}
 
@@ -41,6 +43,7 @@ func MustAuthenticate() gin.HandlerFunc {
 			if len(userPassArray) != 2 {
 				fmt.Fprintf(os.Stderr, "Basic auth not constructed correctly: %v\n", authorization)
 				abortWithUnauthenticated(c)
+				c.Set(GIN_AUTHENTICATED, false)
 				return
 			}
 
@@ -55,10 +58,22 @@ func MustAuthenticate() gin.HandlerFunc {
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Password not correct for request %s: %v\n", authorization, err)
 				abortWithUnauthenticated(c)
+				c.Set(GIN_AUTHENTICATED, false)
 				return
 			}
 
 			c.Set(GIN_USER, &user)
+			c.Set(GIN_AUTHENTICATED, true)
+		}
+	}
+}
+
+func MustAuthenticate() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if IsAuthenticated(c) == false {
+			abortWithUnauthenticated(c)
+		} else {
+			c.Next()
 		}
 	}
 }
@@ -98,6 +113,10 @@ func MustBeGlobalAdmin() gin.HandlerFunc {
 			abortWithUnauthenticated(c)
 		}
 	}
+}
+
+func IsAuthenticated(c *gin.Context) bool {
+	return c.GetBool(GIN_AUTHENTICATED)
 }
 
 func GetUserFromContext(c *gin.Context) *domain.User {

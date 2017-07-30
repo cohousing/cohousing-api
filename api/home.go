@@ -29,10 +29,22 @@ func CreateHomeRoutes(router *gin.RouterGroup) {
 		}
 
 		tenantHome.AddLink(domain2.REL_SELF, basePath)
-		tenantHome.AddLink(domain.REL_APARTMENTS, ApartmentBasePath)
-		tenantHome.AddLink(domain.REL_RESIDENTS, ResidentBasePath)
-		tenantHome.AddLink(domain.REL_USERS, UserBasePath)
-		tenantHome.AddLink(domain.REL_GROUPS, GroupBasePath)
+
+		if IsAuthenticated(c) {
+			permission := ResolvePermission(c)
+			if permission.GlobalAdmin || permission.ReadApartments {
+				tenantHome.AddLink(domain.REL_APARTMENTS, ApartmentBasePath)
+			}
+			if permission.GlobalAdmin || permission.ReadResidents {
+				tenantHome.AddLink(domain.REL_RESIDENTS, ResidentBasePath)
+			}
+			if permission.GlobalAdmin || permission.ReadUsers {
+				tenantHome.AddLink(domain.REL_USERS, UserBasePath)
+			}
+			if permission.GlobalAdmin || permission.ReadGroups {
+				tenantHome.AddLink(domain.REL_GROUPS, GroupBasePath)
+			}
+		}
 
 		c.JSON(http.StatusOK, tenantHome)
 	})

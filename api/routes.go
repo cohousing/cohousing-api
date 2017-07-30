@@ -11,6 +11,7 @@ func CreateRouter() {
 	router := gin.Default()
 	router.Use(ContextResolver())
 	router.Use(location.Default())
+	router.Use(Authenticate())
 
 	apiV1 := router.Group("api/v1")
 
