@@ -1,24 +1,22 @@
 package config
 
 import (
-	"github.com/cohousing/cohousing-tenant-api/domain/admin"
 	"testing"
 	"time"
 )
 
 var (
-	origTenantsLoaderFunc TenantsLoaderFunc
-	tenantsLoaderFuncMock TenantsLoaderFunc = func() []admin.Tenant {
-		return []admin.Tenant{
-			admin.Tenant{
+	tenantsLoaderFuncMock TenantsLoaderFunc = func() []Tenant {
+		return []Tenant{
+			{
 				Context: "tenant1",
 				Name:    "Tenant 1",
 			},
-			admin.Tenant{
+			{
 				Context: "tenant2",
 				Name:    "Tenant 2",
 			},
-			admin.Tenant{
+			{
 				Context:   "tenant3",
 				Name:      "Tenant 3",
 				CustomUrl: "customurl.example.com",
