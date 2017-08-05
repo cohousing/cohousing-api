@@ -3,8 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"github.com/cohousing/cohousing-tenant-api/db/conf"
-	"github.com/cohousing/cohousing-tenant-api/db/tenant"
+	tenantMigrate "github.com/cohousing/cohousing-tenant-api/db/migrate"
 	"github.com/rubenv/sql-migrate"
 	"os"
 )
@@ -20,18 +19,10 @@ func (l StdOutMigrateLogger) Verbose() bool {
 	return true
 }
 
-func MigrateConfDB(confDB *sql.DB) error {
-	return migrateDB(confDB, &migrate.AssetMigrationSource{
-		Asset:    conf.Asset,
-		AssetDir: conf.AssetDir,
-		Dir:      "db/conf",
-	})
-}
-
 func MigrateTenantDB(tenantDB *sql.DB) error {
 	return migrateDB(tenantDB, &migrate.AssetMigrationSource{
-		Asset:    tenant.Asset,
-		AssetDir: tenant.AssetDir,
+		Asset:    tenantMigrate.Asset,
+		AssetDir: tenantMigrate.AssetDir,
 		Dir:      "db/tenant",
 	})
 }
