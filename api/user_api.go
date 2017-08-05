@@ -34,7 +34,7 @@ func userLinkFactory(c *gin.Context, halResource domain2.HalResource, basePath s
 	u.AddLink(domain2.REL_SELF, fmt.Sprintf("%s/%d", basePath, u.ID))
 
 	if detailed {
-		permission := ResolvePermission(c)
+		permission := GetPermissionsFromContext(c)
 		if permission.GlobalAdmin || permission.UpdateUsers {
 			u.AddLink(domain2.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, u.ID))
 		}

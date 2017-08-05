@@ -15,6 +15,8 @@ func CreateRouter() {
 
 	apiV1 := router.Group("api/v1")
 
+	apiV1.POST("/login", Login)
+
 	CreateHomeRoutes(apiV1)
 	CreateApartmentRoutes(apiV1, dbFactory)
 	CreateResidentRoutes(apiV1, dbFactory)

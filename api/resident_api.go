@@ -29,7 +29,7 @@ func residentLinkFactory(c *gin.Context, halResource domain2.HalResource, basePa
 	resident.AddLink(domain2.REL_SELF, fmt.Sprintf("%s/%d", basePath, resident.ID))
 
 	if detailed {
-		permission := ResolvePermission(c)
+		permission := GetPermissionsFromContext(c)
 		if permission.GlobalAdmin || permission.UpdateResidents {
 			resident.AddLink(domain2.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, resident.ID))
 		}

@@ -34,7 +34,7 @@ func groupLinkFactory(c *gin.Context, halResource domain2.HalResource, basePath 
 	u.AddLink(domain2.REL_SELF, fmt.Sprintf("%s/%d", basePath, u.ID))
 
 	if detailed {
-		permission := ResolvePermission(c)
+		permission := GetPermissionsFromContext(c)
 		if permission.GlobalAdmin || permission.UpdateGroups {
 			u.AddLink(domain2.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, u.ID))
 		}

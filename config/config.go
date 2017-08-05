@@ -27,6 +27,8 @@ var (
 type Config struct {
 	TenantDomain string
 
+	TokenSecret string
+
 	DB struct {
 		User     string
 		Password string

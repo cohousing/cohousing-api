@@ -29,7 +29,7 @@ func apartmentLinkFactory(c *gin.Context, halResource domain2.HalResource, baseP
 	halResource.AddLink(domain2.REL_SELF, fmt.Sprintf("%s/%d", basePath, apartment.ID))
 
 	if detailed {
-		permission := ResolvePermission(c)
+		permission := GetPermissionsFromContext(c)
 		if permission.GlobalAdmin || permission.UpdateApartments {
 			halResource.AddLink(domain2.REL_UPDATE, fmt.Sprintf("%s/%d", basePath, apartment.ID))
 		}

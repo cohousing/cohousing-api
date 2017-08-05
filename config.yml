@@ -3,6 +3,8 @@
 # 127.0.0.1 localhost beetlehouse.cohousing.nu
 tenantdomain: "%s.cohousing.nu"
 
+tokensecret: "verysecretstringdochange"
+
 db:
   user: root
   password:

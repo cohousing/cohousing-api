@@ -23,7 +23,7 @@ func MigrateTenantDB(tenantDB *sql.DB) error {
 	return migrateDB(tenantDB, &migrate.AssetMigrationSource{
 		Asset:    tenantMigrate.Asset,
 		AssetDir: tenantMigrate.AssetDir,
-		Dir:      "db/tenant",
+		Dir:      "db/migrate",
 	})
 }
 

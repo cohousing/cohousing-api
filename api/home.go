@@ -31,7 +31,7 @@ func CreateHomeRoutes(router *gin.RouterGroup) {
 		tenantHome.AddLink(domain2.REL_SELF, basePath)
 
 		if IsAuthenticated(c) {
-			permission := ResolvePermission(c)
+			permission := GetPermissionsFromContext(c)
 			if permission.GlobalAdmin || permission.ReadApartments {
 				tenantHome.AddLink(domain.REL_APARTMENTS, ApartmentBasePath)
 			}
